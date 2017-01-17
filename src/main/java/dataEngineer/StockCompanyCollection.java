@@ -1,11 +1,10 @@
 package dataEngineer;
 
-import java.io.File;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.ArrayList;
+import java.util.*;
+
 import org.junit.Assert;
 
 /**
@@ -14,18 +13,19 @@ import org.junit.Assert;
 public final class StockCompanyCollection {
 
     public class Company{
-        String code;
-        String shortName;
-        String fullName;
-        String aMargetCode;
-        String officialWebUrl;
+        public  String code;
+        public String shortName;
+        public String fullName;
+        public String aMargetCode;
+        public String officialWebUrl;
 
     }
-    private static final String STOCK_LIST_PATH = "./src/main/resources/SZAstockList.csv";
+    private static final String SZ_STOCK_LIST_PATH = "./src/main/resources/SZAstockList.csv";
+    private static final String SH_STOCK_LIST_PATH = "./src/main/resources/SHAstockList.csv";
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
     private  static StockCompanyCollection thisInstance = null;
-    private static Company[] ShenZhenStockCompanyCollection = null;
+    private static Collection<Company> companyCollection = null;
 
     private StockCompanyCollection(){
         // Does nothing
@@ -39,14 +39,65 @@ public final class StockCompanyCollection {
     }
 
     public Company[] queryCompanyList(){
-        if (ShenZhenStockCompanyCollection == null){
-            ShenZhenStockCompanyCollection = this.initializeCompanyList(STOCK_LIST_PATH);
+        if (companyCollection == null){
+            companyCollection = new LinkedList<>();
+            companyCollection.addAll(this.readSZAStockCompanyList(SZ_STOCK_LIST_PATH));
+            companyCollection.addAll(this.readSHAStockCompanyList(SH_STOCK_LIST_PATH));
         }
-        return ShenZhenStockCompanyCollection;
+        return companyCollection.toArray(new Company[0]);
     }
 
-    private Company[] initializeCompanyList(String csvFile){
+    /**
+     * Reads ShangHai Stock Market company list.
+     * @param csvFile
+     * @return : A Stock market company list;
+     */
+    private List<Company> readSHAStockCompanyList(String csvFile){
+
         System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
+        Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
+        List<Company> companyList = new LinkedList<>();
+        try(BufferedReader scanner = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile), "UTF-16")))
+        {
+            String header = scanner.readLine();
+            Assert.assertTrue(header.length()>0);
+            List<String> headers = parseLine(header, '\t');
+            Assert.assertNotNull(headers);
+            Assert.assertEquals("公司代码", headers.get(0).substring(0, 4));
+            Assert.assertEquals("公司简称", headers.get(1).substring(0, 4));
+            Assert.assertEquals("A股代码", headers.get(2).substring(0, 4));
+            Assert.assertEquals("A股简称", headers.get(3).substring(0, 4));
+            Assert.assertEquals("A股上市日期", headers.get(4));
+            Assert.assertEquals("A股总股本", headers.get(5));
+            Assert.assertEquals("A股流通股本", headers.get(6));
+
+            // Read row
+            String row =scanner.readLine();
+            while (row!= null && row.length()!=0) {
+                List<String> line = parseLine(row, '\t');
+                Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 7, line.size());
+                Company company = new Company();
+                company.code = "sh" + line.get(0).trim();
+                company.aMargetCode = "sh" + line.get(2).trim();
+                company.shortName = line.get(3).trim();
+                companyList.add(company);
+                row=scanner.readLine();
+            }
+
+        }catch (IOException exc){
+            System.err.println("Exception on idx: " + companyList.size() + "\n" + exc.getMessage());
+        }
+        return companyList;
+    }
+
+    /**
+     * Reads ShenZhen Stock A Market.
+     * @param csvFile
+     * @return List of company.
+     */
+    private List<Company> readSZAStockCompanyList(String csvFile){
+        System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
+        Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
         List<Company> companyList = new LinkedList<>();
         try(Scanner scanner = new Scanner(new File(csvFile)))
         {
@@ -63,10 +114,10 @@ public final class StockCompanyCollection {
                 List<String> line = parseLine(scanner.nextLine());
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 20, line.size());
                 Company company = new Company();
-                company.code = line.get(0);
+                company.code = "sz" + line.get(0).trim();
                 company.shortName = line.get(1);
                 company.fullName = line.get(2);
-                company.aMargetCode = line.get(5);
+                company.aMargetCode = "sz" + line.get(5).trim();
                 company.officialWebUrl = line.get(19);
                 companyList.add(company);
             }
@@ -74,7 +125,7 @@ public final class StockCompanyCollection {
         }catch (Exception exc){
             System.err.println("Exception on idx: " + companyList.size() + "\n" + exc.getMessage());
         }
-        return companyList.toArray(new Company[0]);
+        return companyList;
     }
 
     public static List<String> parseLine(String cvsLine) {
