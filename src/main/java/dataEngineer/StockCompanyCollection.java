@@ -61,7 +61,7 @@ public final class StockCompanyCollection {
             }
             while (scanner.hasNext()) {
                 List<String> line = parseLine(scanner.nextLine());
-                Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+";"+b), 20, line.size());
+                Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 20, line.size());
                 Company company = new Company();
                 company.code = line.get(0);
                 company.shortName = line.get(1);
@@ -72,7 +72,7 @@ public final class StockCompanyCollection {
             }
 
         }catch (Exception exc){
-            System.err.println("Exception on idx: " + companyList.size() + "\t" + exc.getMessage());
+            System.err.println("Exception on idx: " + companyList.size() + "\n" + exc.getMessage());
         }
         return companyList.toArray(new Company[0]);
     }
