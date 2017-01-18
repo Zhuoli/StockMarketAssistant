@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EarningManagerConfigure>
+    <Databases id="Databases" type="xs:ID">
+        <Url>yourURL</Url>
+        <Database>YourDB</Database>
+        <User>UserName</User>
+        <Password>PassWord</Password>
+    </Databases>
+</EarningManagerConfigure>
