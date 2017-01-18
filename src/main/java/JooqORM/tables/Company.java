@@ -8,7 +8,7 @@ import JooqORM.Chinesestock;
 import JooqORM.Keys;
 import JooqORM.tables.records.CompanyRecord;
 
-import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Company extends TableImpl<CompanyRecord> {
 
-    private static final long serialVersionUID = 1935498159;
+    private static final long serialVersionUID = -2098028590;
 
     /**
      * The reference instance of <code>ChineseStock.Company</code>
@@ -68,7 +68,7 @@ public class Company extends TableImpl<CompanyRecord> {
     /**
      * The column <code>ChineseStock.Company.currentpricetimestamp</code>.
      */
-    public final TableField<CompanyRecord, Time> CURRENTPRICETIMESTAMP = createField("currentpricetimestamp", org.jooq.impl.SQLDataType.TIME.nullable(false), this, "");
+    public final TableField<CompanyRecord, Timestamp> CURRENTPRICETIMESTAMP = createField("currentpricetimestamp", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
     /**
      * The column <code>ChineseStock.Company.openprice</code>. 开盘价
@@ -123,7 +123,7 @@ public class Company extends TableImpl<CompanyRecord> {
     /**
      * The column <code>ChineseStock.Company.lastUpdateDateTime</code>. 最后一次更新时间
      */
-    public final TableField<CompanyRecord, Time> LASTUPDATEDATETIME = createField("lastUpdateDateTime", org.jooq.impl.SQLDataType.TIME.nullable(false), this, "最后一次更新时间");
+    public final TableField<CompanyRecord, Timestamp> LASTUPDATEDATETIME = createField("lastUpdateDateTime", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "最后一次更新时间");
 
     /**
      * Create a <code>ChineseStock.Company</code> table reference

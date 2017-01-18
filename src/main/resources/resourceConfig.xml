@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EarningManagerConfigure>
     <Databases id="Databases" type="xs:ID">
-        <Url>yourURL</Url>
-        <Database>YourDB</Database>
-        <User>UserName</User>
-        <Password>PassWord</Password>
+        <Url>earningmanagement.cqxahokpf4dx.us-west-2.rds.amazonaws.com:3306</Url>
+        <Database>ChineseStock</Database>
+        <User>zhuoli</User>
+        <Password>cp8482617</Password>
     </Databases>
 </EarningManagerConfigure>
