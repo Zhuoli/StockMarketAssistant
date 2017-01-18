@@ -4,14 +4,13 @@
 package JooqORM;
 
 
-import JooqORM.tables.Heartbeat;
-import JooqORM.tables.Stock;
+import JooqORM.tables.Company;
 
 import javax.annotation.Generated;
 
 
 /**
- * Convenience access to all tables in EarningManagerDB
+ * Convenience access to all tables in ChineseStock
  */
 @Generated(
     value = {
@@ -24,12 +23,7 @@ import javax.annotation.Generated;
 public class Tables {
 
     /**
-     * The table <code>EarningManagerDB.heartbeat</code>.
+     * The table <code>ChineseStock.Company</code>.
      */
-    public static final Heartbeat HEARTBEAT = JooqORM.tables.Heartbeat.HEARTBEAT;
-
-    /**
-     * The table <code>EarningManagerDB.stock</code>.
-     */
-    public static final Stock STOCK = JooqORM.tables.Stock.STOCK;
+    public static final Company COMPANY = JooqORM.tables.Company.COMPANY;
 }

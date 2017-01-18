@@ -4,10 +4,8 @@
 package JooqORM;
 
 
-import JooqORM.tables.Heartbeat;
-import JooqORM.tables.Stock;
-import JooqORM.tables.records.HeartbeatRecord;
-import JooqORM.tables.records.StockRecord;
+import JooqORM.tables.Company;
+import JooqORM.tables.records.CompanyRecord;
 
 import javax.annotation.Generated;
 
@@ -16,7 +14,7 @@ import org.jooq.impl.AbstractKeys;
 
 
 /**
- * A class modelling foreign key relationships between tables of the <code>EarningManagerDB</code> 
+ * A class modelling foreign key relationships between tables of the <code>ChineseStock</code> 
  * schema
  */
 @Generated(
@@ -38,8 +36,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<HeartbeatRecord> KEY_HEARTBEAT_PRIMARY = UniqueKeys0.KEY_HEARTBEAT_PRIMARY;
-    public static final UniqueKey<StockRecord> KEY_STOCK_PRIMARY = UniqueKeys0.KEY_STOCK_PRIMARY;
+    public static final UniqueKey<CompanyRecord> KEY_COMPANY_PRIMARY = UniqueKeys0.KEY_COMPANY_PRIMARY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -51,7 +48,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 extends AbstractKeys {
-        public static final UniqueKey<HeartbeatRecord> KEY_HEARTBEAT_PRIMARY = createUniqueKey(Heartbeat.HEARTBEAT, "KEY_heartbeat_PRIMARY", Heartbeat.HEARTBEAT.NAME);
-        public static final UniqueKey<StockRecord> KEY_STOCK_PRIMARY = createUniqueKey(Stock.STOCK, "KEY_stock_PRIMARY", Stock.STOCK.SYMBOL);
+        public static final UniqueKey<CompanyRecord> KEY_COMPANY_PRIMARY = createUniqueKey(Company.COMPANY, "KEY_Company_PRIMARY", Company.COMPANY.STOCKID);
     }
 }
