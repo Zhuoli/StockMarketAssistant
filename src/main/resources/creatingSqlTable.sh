@@ -1,7 +1,7 @@
 CREATE TABLE `ChineseStock`.`Company`
 (
    stockid                 VARCHAR(20) NOT NULL COMMENT '股票ID',
-   companyname             VARCHAR(20) NOT NULL COMMENT '公司名称',
+   companyname             VARBINARY(20) NOT NULL COMMENT '公司名称',
    currentprice            FLOAT(4, 2) COMMENT 'Current stock price',
    currentpricetimestamp   DATETIME NOT NULL,
    openprice               FLOAT(4, 2) COMMENT '开盘价',
