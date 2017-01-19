@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Company extends TableImpl<CompanyRecord> {
 
-    private static final long serialVersionUID = -2098028590;
+    private static final long serialVersionUID = -2112380776;
 
     /**
      * The reference instance of <code>ChineseStock.Company</code>
@@ -58,7 +58,7 @@ public class Company extends TableImpl<CompanyRecord> {
     /**
      * The column <code>ChineseStock.Company.companyname</code>. 公司名称
      */
-    public final TableField<CompanyRecord, String> COMPANYNAME = createField("companyname", org.jooq.impl.SQLDataType.VARCHAR.length(20).nullable(false), this, "公司名称");
+    public final TableField<CompanyRecord, byte[]> COMPANYNAME = createField("companyname", org.jooq.impl.SQLDataType.BINARY.length(1).nullable(false), this, "公司名称");
 
     /**
      * The column <code>ChineseStock.Company.currentprice</code>. Current stock price

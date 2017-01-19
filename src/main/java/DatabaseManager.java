@@ -3,6 +3,7 @@ import JooqORM.tables.records.CompanyRecord;
 import com.sun.jna.platform.win32.Sspi;
 import dataEngineer.StockCompanyCollection;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
@@ -14,14 +15,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -98,6 +97,7 @@ public class DatabaseManager {
 
     public DatabaseManager Authenticate() throws SQLException {
         this.getDBJooqCreate();
+        this.conn.close();
         return this;
     }
 
@@ -146,16 +146,37 @@ public class DatabaseManager {
 
         // Check each email order
         for (StockCompanyCollection.CompanyObject companyObject : companies) {
-
             try {
 
                 this.getDBJooqCreate()
                         .insertInto(COMPANY, COMPANY.STOCKID, COMPANY.COMPANYNAME, COMPANY.CURRENTPRICETIMESTAMP, COMPANY.LASTUPDATEDATETIME)
-                        .values(companyObject.aMargetCode, new String("你好世界".getBytes("UTF-8")), Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now())).execute();
+                        .values(companyObject.aMargetCode, companyObject.shortName.getBytes("UTF-8"), Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now())).execute();
 //                    .onDuplicateKeyUpdate();
+
+                String companyName = this.queryDBCompanyName(companyObject.aMargetCode);
+                Assert.assertTrue(companyName.equals(companyObject.shortName));
             }catch (Exception exc){
 
             }
         }
+    }
+
+    /**
+     * Retrieve company name given StockID in the database.
+     * @param stockid
+     * @return
+     * @throws SQLException
+     * @throws UnsupportedEncodingException
+     */
+    public String queryDBCompanyName(String stockid) throws SQLException, UnsupportedEncodingException{
+        Result<CompanyRecord> result =
+                this.getDBJooqCreate()
+                        .selectFrom(COMPANY)
+                        .where(COMPANY.STOCKID.eq(stockid))
+                        .fetch();
+        for(CompanyRecord companyRecord : result){
+            return new String(companyRecord.getCompanyname(), "UTF-8");
+        }
+        return "";
     }
 }
