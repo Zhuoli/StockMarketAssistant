@@ -1,7 +1,7 @@
 package dataEngineer;
 
 /**
- * Represents an Company's Shares Quote.
+ * Represents an CompanyObject's Shares Quote.
  */
 public class SharesQuote {
     public double currentPrice;

@@ -12,7 +12,7 @@ import org.junit.Assert;
  */
 public final class StockCompanyCollection {
 
-    public class Company{
+    public class CompanyObject {
         public  String code;
         public String shortName;
         public String fullName;
@@ -25,7 +25,7 @@ public final class StockCompanyCollection {
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
     private  static StockCompanyCollection thisInstance = null;
-    private static Collection<Company> companyCollection = null;
+    private static Collection<CompanyObject> companyObjectCollection = null;
 
     private StockCompanyCollection(){
         // Does nothing
@@ -38,13 +38,13 @@ public final class StockCompanyCollection {
         return thisInstance;
     }
 
-    public Company[] queryCompanyList(){
-        if (companyCollection == null){
-            companyCollection = new LinkedList<>();
-            companyCollection.addAll(this.readSZAStockCompanyList(SZ_STOCK_LIST_PATH));
-            companyCollection.addAll(this.readSHAStockCompanyList(SH_STOCK_LIST_PATH));
+    public CompanyObject[] queryCompanyList(){
+        if (companyObjectCollection == null){
+            companyObjectCollection = new LinkedList<>();
+            companyObjectCollection.addAll(this.readSZAStockCompanyList(SZ_STOCK_LIST_PATH));
+            companyObjectCollection.addAll(this.readSHAStockCompanyList(SH_STOCK_LIST_PATH));
         }
-        return companyCollection.toArray(new Company[0]);
+        return companyObjectCollection.toArray(new CompanyObject[0]);
     }
 
     /**
@@ -52,11 +52,11 @@ public final class StockCompanyCollection {
      * @param csvFile
      * @return : A Stock market company list;
      */
-    private List<Company> readSHAStockCompanyList(String csvFile){
+    private List<CompanyObject> readSHAStockCompanyList(String csvFile){
 
         System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
         Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
-        List<Company> companyList = new LinkedList<>();
+        List<CompanyObject> companyObjectList = new LinkedList<>();
         try(BufferedReader scanner = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile), "UTF-16")))
         {
             String header = scanner.readLine();
@@ -76,18 +76,18 @@ public final class StockCompanyCollection {
             while (row!= null && row.length()!=0) {
                 List<String> line = parseLine(row, '\t');
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 7, line.size());
-                Company company = new Company();
-                company.code = "sh" + line.get(0).trim();
-                company.aMargetCode = "sh" + line.get(2).trim();
-                company.shortName = line.get(3).trim();
-                companyList.add(company);
+                CompanyObject companyObject = new CompanyObject();
+                companyObject.code = "sh" + line.get(0).trim();
+                companyObject.aMargetCode = "sh" + line.get(2).trim();
+                companyObject.shortName = line.get(3).trim();
+                companyObjectList.add(companyObject);
                 row=scanner.readLine();
             }
 
         }catch (IOException exc){
-            System.err.println("Exception on idx: " + companyList.size() + "\n" + exc.getMessage());
+            System.err.println("Exception on idx: " + companyObjectList.size() + "\n" + exc.getMessage());
         }
-        return companyList;
+        return companyObjectList;
     }
 
     /**
@@ -95,10 +95,10 @@ public final class StockCompanyCollection {
      * @param csvFile
      * @return List of company.
      */
-    private List<Company> readSZAStockCompanyList(String csvFile){
+    private List<CompanyObject> readSZAStockCompanyList(String csvFile){
         System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
         Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
-        List<Company> companyList = new LinkedList<>();
+        List<CompanyObject> companyObjectList = new LinkedList<>();
         try(Scanner scanner = new Scanner(new File(csvFile)))
         {
             if (scanner.hasNext()){
@@ -113,19 +113,19 @@ public final class StockCompanyCollection {
             while (scanner.hasNext()) {
                 List<String> line = parseLine(scanner.nextLine());
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 20, line.size());
-                Company company = new Company();
-                company.code = "sz" + line.get(0).trim();
-                company.shortName = line.get(1);
-                company.fullName = line.get(2);
-                company.aMargetCode = "sz" + line.get(5).trim();
-                company.officialWebUrl = line.get(19);
-                companyList.add(company);
+                CompanyObject companyObject = new CompanyObject();
+                companyObject.code = "sz" + line.get(0).trim();
+                companyObject.shortName = line.get(1);
+                companyObject.fullName = line.get(2);
+                companyObject.aMargetCode = "sz" + line.get(5).trim();
+                companyObject.officialWebUrl = line.get(19);
+                companyObjectList.add(companyObject);
             }
 
         }catch (Exception exc){
-            System.err.println("Exception on idx: " + companyList.size() + "\n" + exc.getMessage());
+            System.err.println("Exception on idx: " + companyObjectList.size() + "\n" + exc.getMessage());
         }
-        return companyList;
+        return companyObjectList;
     }
 
     public static List<String> parseLine(String cvsLine) {

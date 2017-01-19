@@ -3,7 +3,7 @@ CREATE TABLE `ChineseStock`.`Company`
    stockid                 VARCHAR(20) NOT NULL COMMENT '股票ID',
    companyname             VARCHAR(20) NOT NULL COMMENT '公司名称',
    currentprice            FLOAT(4, 2) COMMENT 'Current stock price',
-   currentpricetimestamp   TIME NOT NULL,
+   currentpricetimestamp   DATETIME NOT NULL,
    openprice               FLOAT(4, 2) COMMENT '开盘价',
    closeprice              FLOAT(4, 2) COMMENT '昨日收盘价',
    marketcap               FLOAT(4, 2) COMMENT '总市值',
@@ -16,5 +16,6 @@ CREATE TABLE `ChineseStock`.`Company`
                               DEFAULT 0
                               COMMENT '市净率 Price-to-book ratio',
    `PER`                   INT(5) DEFAULT 0 COMMENT '市盈率',
+   lastUpdateDateTime   DATETIME NOT NULL COMMENT '最后一次更新时间',
    PRIMARY KEY(stockid)
-)
+   )
