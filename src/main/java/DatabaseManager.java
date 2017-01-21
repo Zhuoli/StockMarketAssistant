@@ -1,9 +1,6 @@
 import JooqORM.tables.records.CompanyRecord;
 import dataEngineer.StockCompanyCollection;
-import org.jooq.DSLContext;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
-import org.jooq.Table;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.junit.Assert;
 import org.w3c.dom.Document;
@@ -20,9 +17,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static JooqORM.Tables.COMPANY;
 
@@ -54,7 +52,7 @@ public class DatabaseManager {
 
     /**
      * Gets Database Manager instance.
-     * 
+     *
      * @param pathString
      * @return
      */
@@ -134,8 +132,12 @@ public class DatabaseManager {
                 .findFirst();
     }
 
+    final static int BATCH_SIZE = 100;
+
     public void insertOnDuplicateUpdate(StockCompanyCollection.CompanyObject... companies)
             throws SQLException, ClassNotFoundException {
+        Iterator<StockCompanyCollection.CompanyObject> companyObjectIterator =
+                Arrays.asList(companies).iterator();
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -144,21 +146,47 @@ public class DatabaseManager {
             throw e;
         }
 
-        // Check each email order
-        for (StockCompanyCollection.CompanyObject companyObject : companies) {
-            try {
+        DSLContext creator = this.getDBJooqCreate();
 
-                this.getDBJooqCreate()
-                        .insertInto(COMPANY, COMPANY.STOCKID, COMPANY.COMPANYNAME,
-                                COMPANY.CURRENTPRICETIMESTAMP, COMPANY.LAST_UPDATE_DATE_TIME)
-                        .values(companyObject.aMargetCode, companyObject.shortName,
-                                Timestamp.valueOf(LocalDateTime.now()),
-                                Timestamp.valueOf(LocalDateTime.now()))
-                        .execute();
-                // .onDuplicateKeyUpdate();
-            } catch (Exception exc) {
+        // Get next batch of company
+        StockCompanyCollection.CompanyObject[] companyObjects =
+                this.getNextBatch(companyObjectIterator, BATCH_SIZE);
 
-            }
+        // Batch insert companies
+        while (companyObjects != null && companyObjects.length > 0) {
+
+            // Convert companyobject array to JOOQ query array
+           Set<InsertOnDuplicateStep> querySet =  Arrays.stream(companyObjects).map(
+                    companyObject -> creator.insertInto(COMPANY, COMPANY.STOCKID,
+                                                        COMPANY.COMPANYNAME, COMPANY.CURRENTPRICETIMESTAMP,
+                                                        COMPANY.LAST_UPDATE_DATE_TIME)
+                                            .values(companyObject.aMargetCode,
+                                                    companyObject.shortName, Timestamp.valueOf(LocalDateTime.now()),
+                                                    Timestamp.valueOf(LocalDateTime.now()))
+                                            ).collect(Collectors.toSet());
+
+
+            creator.batch(querySet.toArray(new InsertOnDuplicateStep[0])).execute();
+
+            companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
         }
+    }
+
+    /**
+     * Get next batch company
+     *
+     * @param iterator
+     * @param size
+     * @return
+     */
+    private StockCompanyCollection.CompanyObject[] getNextBatch(
+            Iterator<StockCompanyCollection.CompanyObject> iterator, int size) {
+        List<StockCompanyCollection.CompanyObject> list = new LinkedList<>();
+
+        int count = 0;
+        while (count++ < size && iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        return list.toArray(new StockCompanyCollection.CompanyObject[0]);
     }
 }
