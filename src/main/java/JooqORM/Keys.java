@@ -48,6 +48,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 extends AbstractKeys {
-        public static final UniqueKey<CompanyRecord> KEY_COMPANY_PRIMARY = createUniqueKey(Company.COMPANY, "KEY_Company_PRIMARY", Company.COMPANY.STOCKID);
+        public static final UniqueKey<CompanyRecord> KEY_COMPANY_PRIMARY = createUniqueKey(Company.COMPANY, "KEY_company_PRIMARY", Company.COMPANY.STOCKID);
     }
 }

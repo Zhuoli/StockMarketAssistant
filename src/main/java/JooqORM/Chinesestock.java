@@ -30,7 +30,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Chinesestock extends SchemaImpl {
 
-    private static final long serialVersionUID = 715590074;
+    private static final long serialVersionUID = -1802835494;
 
     /**
      * The reference instance of <code>ChineseStock</code>
@@ -38,7 +38,7 @@ public class Chinesestock extends SchemaImpl {
     public static final Chinesestock CHINESESTOCK = new Chinesestock();
 
     /**
-     * The table <code>ChineseStock.Company</code>.
+     * The table <code>ChineseStock.company</code>.
      */
     public final Company COMPANY = JooqORM.tables.Company.COMPANY;
 

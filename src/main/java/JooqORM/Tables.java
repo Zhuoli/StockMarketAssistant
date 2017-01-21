@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 public class Tables {
 
     /**
-     * The table <code>ChineseStock.Company</code>.
+     * The table <code>ChineseStock.company</code>.
      */
     public static final Company COMPANY = JooqORM.tables.Company.COMPANY;
 }

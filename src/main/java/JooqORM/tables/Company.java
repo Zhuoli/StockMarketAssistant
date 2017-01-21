@@ -35,10 +35,10 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Company extends TableImpl<CompanyRecord> {
 
-    private static final long serialVersionUID = -2112380776;
+    private static final long serialVersionUID = 1874719104;
 
     /**
-     * The reference instance of <code>ChineseStock.Company</code>
+     * The reference instance of <code>ChineseStock.company</code>
      */
     public static final Company COMPANY = new Company();
 
@@ -51,89 +51,89 @@ public class Company extends TableImpl<CompanyRecord> {
     }
 
     /**
-     * The column <code>ChineseStock.Company.stockid</code>. 股票ID
+     * The column <code>ChineseStock.company.stockid</code>. 股票ID
      */
-    public final TableField<CompanyRecord, String> STOCKID = createField("stockid", org.jooq.impl.SQLDataType.VARCHAR.length(20).nullable(false), this, "股票ID");
+    public final TableField<CompanyRecord, String> STOCKID = createField("stockid", org.jooq.impl.SQLDataType.VARCHAR.length(255).nullable(false), this, "股票ID");
 
     /**
-     * The column <code>ChineseStock.Company.companyname</code>. 公司名称
+     * The column <code>ChineseStock.company.capitalizationvalue</code>. 流通市值
      */
-    public final TableField<CompanyRecord, byte[]> COMPANYNAME = createField("companyname", org.jooq.impl.SQLDataType.BINARY.length(1).nullable(false), this, "公司名称");
+    public final TableField<CompanyRecord, Double> CAPITALIZATIONVALUE = createField("capitalizationvalue", org.jooq.impl.SQLDataType.DOUBLE, this, "流通市值");
 
     /**
-     * The column <code>ChineseStock.Company.currentprice</code>. Current stock price
+     * The column <code>ChineseStock.company.closeprice</code>. 昨日收盘价
      */
-    public final TableField<CompanyRecord, Double> CURRENTPRICE = createField("currentprice", org.jooq.impl.SQLDataType.FLOAT, this, "Current stock price");
+    public final TableField<CompanyRecord, Double> CLOSEPRICE = createField("closeprice", org.jooq.impl.SQLDataType.DOUBLE, this, "昨日收盘价");
 
     /**
-     * The column <code>ChineseStock.Company.currentpricetimestamp</code>.
+     * The column <code>ChineseStock.company.companyname</code>. 公司名称
+     */
+    public final TableField<CompanyRecord, String> COMPANYNAME = createField("companyname", org.jooq.impl.SQLDataType.VARCHAR.length(255).nullable(false), this, "公司名称");
+
+    /**
+     * The column <code>ChineseStock.company.currentprice</code>. Current Price
+     */
+    public final TableField<CompanyRecord, Double> CURRENTPRICE = createField("currentprice", org.jooq.impl.SQLDataType.DOUBLE, this, "Current Price");
+
+    /**
+     * The column <code>ChineseStock.company.currentpricetimestamp</code>.
      */
     public final TableField<CompanyRecord, Timestamp> CURRENTPRICETIMESTAMP = createField("currentpricetimestamp", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
     /**
-     * The column <code>ChineseStock.Company.openprice</code>. 开盘价
+     * The column <code>ChineseStock.company.last_update_date_time</code>. 最后一次更新时间
      */
-    public final TableField<CompanyRecord, Double> OPENPRICE = createField("openprice", org.jooq.impl.SQLDataType.FLOAT, this, "开盘价");
+    public final TableField<CompanyRecord, Timestamp> LAST_UPDATE_DATE_TIME = createField("last_update_date_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "最后一次更新时间");
 
     /**
-     * The column <code>ChineseStock.Company.closeprice</code>. 昨日收盘价
+     * The column <code>ChineseStock.company.marketcap</code>. 总市值
      */
-    public final TableField<CompanyRecord, Double> CLOSEPRICE = createField("closeprice", org.jooq.impl.SQLDataType.FLOAT, this, "昨日收盘价");
+    public final TableField<CompanyRecord, Double> MARKETCAP = createField("marketcap", org.jooq.impl.SQLDataType.DOUBLE, this, "总市值");
 
     /**
-     * The column <code>ChineseStock.Company.marketcap</code>. 总市值
+     * The column <code>ChineseStock.company.openprice</code>. 开盘价
      */
-    public final TableField<CompanyRecord, Double> MARKETCAP = createField("marketcap", org.jooq.impl.SQLDataType.FLOAT, this, "总市值");
+    public final TableField<CompanyRecord, Double> OPENPRICE = createField("openprice", org.jooq.impl.SQLDataType.DOUBLE, this, "开盘价");
 
     /**
-     * The column <code>ChineseStock.Company.capitalizationvalue</code>. 流通市值
+     * The column <code>ChineseStock.company.oscillation</code>. 股票振幅
      */
-    public final TableField<CompanyRecord, Double> CAPITALIZATIONVALUE = createField("capitalizationvalue", org.jooq.impl.SQLDataType.FLOAT, this, "流通市值");
+    public final TableField<CompanyRecord, Double> OSCILLATION = createField("oscillation", org.jooq.impl.SQLDataType.DOUBLE, this, "股票振幅");
 
     /**
-     * The column <code>ChineseStock.Company.tradingvolume</code>. 成交量
+     * The column <code>ChineseStock.company.pbr</code>. 市净率 Price-to-book ratio
      */
-    public final TableField<CompanyRecord, Double> TRADINGVOLUME = createField("tradingvolume", org.jooq.impl.SQLDataType.FLOAT, this, "成交量");
+    public final TableField<CompanyRecord, Integer> PBR = createField("pbr", org.jooq.impl.SQLDataType.INTEGER, this, "市净率 Price-to-book ratio");
 
     /**
-     * The column <code>ChineseStock.Company.tradingvalue</code>. 成交额
+     * The column <code>ChineseStock.company.per</code>. 市盈率
      */
-    public final TableField<CompanyRecord, Double> TRADINGVALUE = createField("tradingvalue", org.jooq.impl.SQLDataType.FLOAT, this, "成交额");
+    public final TableField<CompanyRecord, Integer> PER = createField("per", org.jooq.impl.SQLDataType.INTEGER, this, "市盈率");
 
     /**
-     * The column <code>ChineseStock.Company.oscillation</code>. 股票振幅
+     * The column <code>ChineseStock.company.tradingvalue</code>. 成交额
      */
-    public final TableField<CompanyRecord, Double> OSCILLATION = createField("oscillation", org.jooq.impl.SQLDataType.FLOAT, this, "股票振幅");
+    public final TableField<CompanyRecord, Double> TRADINGVALUE = createField("tradingvalue", org.jooq.impl.SQLDataType.DOUBLE, this, "成交额");
 
     /**
-     * The column <code>ChineseStock.Company.turnoverrate</code>. 换手率
+     * The column <code>ChineseStock.company.tradingvolume</code>. 成交量
      */
-    public final TableField<CompanyRecord, Double> TURNOVERRATE = createField("turnoverrate", org.jooq.impl.SQLDataType.FLOAT.defaultValue(org.jooq.impl.DSL.inline("0.00", org.jooq.impl.SQLDataType.FLOAT)), this, "换手率");
+    public final TableField<CompanyRecord, Double> TRADINGVOLUME = createField("tradingvolume", org.jooq.impl.SQLDataType.DOUBLE, this, "成交量");
 
     /**
-     * The column <code>ChineseStock.Company.PBR</code>. 市净率 Price-to-book ratio
+     * The column <code>ChineseStock.company.turnoverrate</code>. 换手率
      */
-    public final TableField<CompanyRecord, Integer> PBR = createField("PBR", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "市净率 Price-to-book ratio");
+    public final TableField<CompanyRecord, Double> TURNOVERRATE = createField("turnoverrate", org.jooq.impl.SQLDataType.DOUBLE, this, "换手率");
 
     /**
-     * The column <code>ChineseStock.Company.PER</code>. 市盈率
-     */
-    public final TableField<CompanyRecord, Integer> PER = createField("PER", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "市盈率");
-
-    /**
-     * The column <code>ChineseStock.Company.lastUpdateDateTime</code>. 最后一次更新时间
-     */
-    public final TableField<CompanyRecord, Timestamp> LASTUPDATEDATETIME = createField("lastUpdateDateTime", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "最后一次更新时间");
-
-    /**
-     * Create a <code>ChineseStock.Company</code> table reference
+     * Create a <code>ChineseStock.company</code> table reference
      */
     public Company() {
-        this("Company", null);
+        this("company", null);
     }
 
     /**
-     * Create an aliased <code>ChineseStock.Company</code> table reference
+     * Create an aliased <code>ChineseStock.company</code> table reference
      */
     public Company(String alias) {
         this(alias, COMPANY);
