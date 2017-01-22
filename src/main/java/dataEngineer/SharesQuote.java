@@ -4,6 +4,10 @@ package dataEngineer;
  * Represents an CompanyObject's Shares Quote.
  */
 public class SharesQuote {
+
+    public String stockid;
+    public String companyname;
+
     public double currentPrice;
 
     public double openPrice;
@@ -25,4 +29,7 @@ public class SharesQuote {
     public double price2EarningRatio;
     // 市净率
     public double price2BookRatio;
+
+
+    public String officialWebUrl;
 }

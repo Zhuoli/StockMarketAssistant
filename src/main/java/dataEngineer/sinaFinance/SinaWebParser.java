@@ -45,7 +45,7 @@ public class SinaWebParser {
     }
 
     // Set web drover to PhantomJSDriver
-    final static PhantomJSDriver WebDriver = new PhantomJSDriver(caps);
+    final PhantomJSDriver WebDriver = new PhantomJSDriver(caps);
 
     public SinaWebParser(){
         // Does nothing

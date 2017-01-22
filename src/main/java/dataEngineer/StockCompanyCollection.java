@@ -12,24 +12,12 @@ import org.junit.Assert;
  */
 public final class StockCompanyCollection {
 
-    public class CompanyObject {
-        public  String code;
-        public String shortName;
-        public String fullName;
-        public String aMargetCode;
-        public String officialWebUrl;
-
-        public double PER;
-        public double PBR;
-        public double currentprice;
-
-    }
     private static final String SZ_STOCK_LIST_PATH = "./src/main/resources/SZAstockList.csv";
     private static final String SH_STOCK_LIST_PATH = "./src/main/resources/SHAstockList.csv";
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
     private  static StockCompanyCollection thisInstance = null;
-    private static Collection<CompanyObject> companyObjectCollection = null;
+    private static Collection<SharesQuote> companyObjectCollection = null;
 
     private StockCompanyCollection(){
         // Does nothing
@@ -42,13 +30,13 @@ public final class StockCompanyCollection {
         return thisInstance;
     }
 
-    public CompanyObject[] queryCompanyList(){
+    public SharesQuote[] queryCompanyList(){
         if (companyObjectCollection == null){
             companyObjectCollection = new LinkedList<>();
             companyObjectCollection.addAll(this.readSZAStockCompanyList(SZ_STOCK_LIST_PATH));
             companyObjectCollection.addAll(this.readSHAStockCompanyList(SH_STOCK_LIST_PATH));
         }
-        return companyObjectCollection.toArray(new CompanyObject[0]);
+        return companyObjectCollection.toArray(new SharesQuote[0]);
     }
 
     /**
@@ -56,11 +44,11 @@ public final class StockCompanyCollection {
      * @param csvFile
      * @return : A Stock market company list;
      */
-    private List<CompanyObject> readSHAStockCompanyList(String csvFile){
+    private List<SharesQuote> readSHAStockCompanyList(String csvFile){
 
         System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
         Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
-        List<CompanyObject> companyObjectList = new LinkedList<>();
+        List<SharesQuote> companyObjectList = new LinkedList<>();
         try(BufferedReader scanner = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile), "UTF-16")))
         {
             String header = scanner.readLine();
@@ -80,10 +68,10 @@ public final class StockCompanyCollection {
             while (row!= null && row.length()!=0) {
                 List<String> line = parseLine(row, '\t');
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 7, line.size());
-                CompanyObject companyObject = new CompanyObject();
-                companyObject.code = "sh" + line.get(0).trim();
-                companyObject.aMargetCode = "sh" + line.get(2).trim();
-                companyObject.shortName = line.get(3).trim();
+                SharesQuote companyObject = new SharesQuote();
+//                companyObject.code = "sh" + line.get(0).trim();
+                companyObject.stockid = "sh" + line.get(2).trim();
+                companyObject.companyname = line.get(3).trim();
                 companyObjectList.add(companyObject);
                 row=scanner.readLine();
             }
@@ -99,10 +87,10 @@ public final class StockCompanyCollection {
      * @param csvFile
      * @return List of company.
      */
-    private List<CompanyObject> readSZAStockCompanyList(String csvFile){
+    private List<SharesQuote> readSZAStockCompanyList(String csvFile){
         System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
         Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
-        List<CompanyObject> companyObjectList = new LinkedList<>();
+        List<SharesQuote> companyObjectList = new LinkedList<>();
         try(Scanner scanner = new Scanner(new File(csvFile)))
         {
             if (scanner.hasNext()){
@@ -117,11 +105,11 @@ public final class StockCompanyCollection {
             while (scanner.hasNext()) {
                 List<String> line = parseLine(scanner.nextLine());
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 20, line.size());
-                CompanyObject companyObject = new CompanyObject();
-                companyObject.code = "sz" + line.get(0).trim();
-                companyObject.shortName = line.get(1);
-                companyObject.fullName = line.get(2);
-                companyObject.aMargetCode = "sz" + line.get(5).trim();
+                SharesQuote companyObject = new SharesQuote();
+//                companyObject.stockid = "sz" + line.get(0).trim();
+                companyObject.companyname = line.get(1);
+//                companyObject.fullName = line.get(2);
+                companyObject.stockid = "sz" + line.get(5).trim();
                 companyObject.officialWebUrl = line.get(19);
                 companyObjectList.add(companyObject);
             }

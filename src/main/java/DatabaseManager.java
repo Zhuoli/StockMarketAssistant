@@ -1,5 +1,5 @@
 import JooqORM.tables.records.CompanyRecord;
-import dataEngineer.StockCompanyCollection;
+import dataEngineer.SharesQuote;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.junit.Assert;
@@ -10,13 +10,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -132,12 +132,18 @@ public class DatabaseManager {
                 .findFirst();
     }
 
-    final static int BATCH_SIZE = 100;
+    final static int BATCH_SIZE = 1000;
 
-    public void insertOnDuplicateUpdate(StockCompanyCollection.CompanyObject... companies)
-            throws SQLException, ClassNotFoundException {
-        Iterator<StockCompanyCollection.CompanyObject> companyObjectIterator =
-                Arrays.asList(companies).iterator();
+    /**
+     * Inserts on duplicate ignore.
+     * 
+     * @param companies
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void insertOnDuplicateIgnore(SharesQuote... companies) throws SQLException,
+            ClassNotFoundException {
+        Iterator<SharesQuote> companyObjectIterator = Arrays.asList(companies).iterator();
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -149,35 +155,90 @@ public class DatabaseManager {
         DSLContext creator = this.getDBJooqCreate();
 
         // Get next batch of company
-        StockCompanyCollection.CompanyObject[] companyObjects =
-                this.getNextBatch(companyObjectIterator, BATCH_SIZE);
+        SharesQuote[] companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
 
         // Batch insert companies
         while (companyObjects != null && companyObjects.length > 0) {
 
             // Convert companyobject array to JOOQ query array
-           Set<InsertOnDuplicateStep> querySet =  Arrays.stream(companyObjects).map(
-                    companyObject ->
-                            creator.insertInto(COMPANY,
-                                        COMPANY.STOCKID,
-                                        COMPANY.COMPANYNAME,
-                                        COMPANY.CURRENTPRICETIMESTAMP,
-                                        COMPANY.LAST_UPDATE_DATE_TIME,
-                                        COMPANY.PBR,
-                                        COMPANY.PER,
-                                        COMPANY.CURRENTPRICE)
-                                    .values(
-                                            companyObject.aMargetCode,
-                                            companyObject.shortName,
+            List<InsertFinalStep<CompanyRecord>> list =
+                    Arrays.stream(companyObjects)
+                            .map(companyObject -> creator
+                                    .insertInto(COMPANY, COMPANY.STOCKID, COMPANY.COMPANYNAME,
+                                            COMPANY.CURRENTPRICETIMESTAMP,
+                                            COMPANY.LAST_UPDATE_DATE_TIME, COMPANY.PBR,
+                                            COMPANY.PER, COMPANY.CURRENTPRICE)
+                                    .values(companyObject.stockid, companyObject.companyname,
                                             Timestamp.valueOf(LocalDateTime.now()),
                                             Timestamp.valueOf(LocalDateTime.now()),
-                                            companyObject.PBR,
-                                            companyObject.PER,
-                                            companyObject.currentprice
-                                            )).collect(Collectors.toSet());
+                                            companyObject.price2BookRatio,
+                                            companyObject.price2EarningRatio,
+                                            companyObject.currentPrice)
+                                    .onDuplicateKeyIgnore())
+                            .collect(Collectors.toList());
 
+            LocalDateTime start = LocalDateTime.now();
+            System.out.println("Batch start time: " + start);
+            creator.batch(list).execute();
+            System.out.println("Batch end time: " + LocalDateTime.now());
+            System.out.println("Time cost in mins: "
+                    + ChronoUnit.MINUTES.between(start, LocalDateTime.now()));
 
-            creator.batch(querySet.toArray(new InsertOnDuplicateStep[0])).execute();
+            companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
+        }
+    }
+
+    /**
+     * Insert or update companies.
+     * 
+     * @param companies
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void insertOnDuplicateUpdate(SharesQuote... companies) throws SQLException,
+            ClassNotFoundException {
+        Iterator<SharesQuote> companyObjectIterator = Arrays.asList(companies).iterator();
+
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            Logger.getGlobal().log(Level.SEVERE, "", e);
+            throw e;
+        }
+
+        DSLContext creator = this.getDBJooqCreate();
+
+        // Get next batch of company
+        SharesQuote[] companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
+
+        // Batch insert companies
+        while (companyObjects != null && companyObjects.length > 0) {
+
+            // Convert companyobject array to JOOQ query array
+            List<InsertOnDuplicateSetMoreStep<CompanyRecord>> list =
+                    Arrays.stream(companyObjects)
+                            .map(companyObject -> creator
+                                    .insertInto(COMPANY, COMPANY.STOCKID, COMPANY.COMPANYNAME,
+                                            COMPANY.CURRENTPRICETIMESTAMP,
+                                            COMPANY.LAST_UPDATE_DATE_TIME, COMPANY.PBR,
+                                            COMPANY.PER, COMPANY.CURRENTPRICE)
+                                    .values(companyObject.stockid, companyObject.companyname,
+                                            Timestamp.valueOf(LocalDateTime.now()),
+                                            Timestamp.valueOf(LocalDateTime.now()),
+                                            companyObject.price2BookRatio,
+                                            companyObject.price2EarningRatio,
+                                            companyObject.currentPrice)
+                                    .onDuplicateKeyUpdate()
+                                    .set(COMPANY.CURRENTPRICE, companyObject.currentPrice)
+                                    .set(COMPANY.PBR, companyObject.price2BookRatio)
+                                    .set(COMPANY.PER, companyObject.price2EarningRatio)
+                                    .set(COMPANY.OPENPRICE, companyObject.openPrice)
+                                    .set(COMPANY.CLOSEPRICE, companyObject.closePrice)
+                                    .set(COMPANY.CURRENTPRICETIMESTAMP, Timestamp.valueOf(LocalDateTime.now()))
+                                    .set(COMPANY.LAST_UPDATE_DATE_TIME, Timestamp.valueOf(LocalDateTime.now())))
+                            .collect(Collectors.toList());
+
+            creator.batch(list).execute();
 
             companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
         }
@@ -190,14 +251,13 @@ public class DatabaseManager {
      * @param size
      * @return
      */
-    private StockCompanyCollection.CompanyObject[] getNextBatch(
-            Iterator<StockCompanyCollection.CompanyObject> iterator, int size) {
-        List<StockCompanyCollection.CompanyObject> list = new LinkedList<>();
+    private SharesQuote[] getNextBatch(Iterator<SharesQuote> iterator, int size) {
+        List<SharesQuote> list = new LinkedList<>();
 
         int count = 0;
         while (count++ < size && iterator.hasNext()) {
             list.add(iterator.next());
         }
-        return list.toArray(new StockCompanyCollection.CompanyObject[0]);
+        return list.toArray(new SharesQuote[0]);
     }
 }
