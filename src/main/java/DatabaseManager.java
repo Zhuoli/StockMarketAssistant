@@ -157,13 +157,24 @@ public class DatabaseManager {
 
             // Convert companyobject array to JOOQ query array
            Set<InsertOnDuplicateStep> querySet =  Arrays.stream(companyObjects).map(
-                    companyObject -> creator.insertInto(COMPANY, COMPANY.STOCKID,
-                                                        COMPANY.COMPANYNAME, COMPANY.CURRENTPRICETIMESTAMP,
-                                                        COMPANY.LAST_UPDATE_DATE_TIME)
-                                            .values(companyObject.aMargetCode,
-                                                    companyObject.shortName, Timestamp.valueOf(LocalDateTime.now()),
-                                                    Timestamp.valueOf(LocalDateTime.now()))
-                                            ).collect(Collectors.toSet());
+                    companyObject ->
+                            creator.insertInto(COMPANY,
+                                        COMPANY.STOCKID,
+                                        COMPANY.COMPANYNAME,
+                                        COMPANY.CURRENTPRICETIMESTAMP,
+                                        COMPANY.LAST_UPDATE_DATE_TIME,
+                                        COMPANY.PBR,
+                                        COMPANY.PER,
+                                        COMPANY.CURRENTPRICE)
+                                    .values(
+                                            companyObject.aMargetCode,
+                                            companyObject.shortName,
+                                            Timestamp.valueOf(LocalDateTime.now()),
+                                            Timestamp.valueOf(LocalDateTime.now()),
+                                            companyObject.PBR,
+                                            companyObject.PER,
+                                            companyObject.currentprice
+                                            )).collect(Collectors.toSet());
 
 
             creator.batch(querySet.toArray(new InsertOnDuplicateStep[0])).execute();

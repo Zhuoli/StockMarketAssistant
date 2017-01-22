@@ -19,6 +19,10 @@ public final class StockCompanyCollection {
         public String aMargetCode;
         public String officialWebUrl;
 
+        public double PER;
+        public double PBR;
+        public double currentprice;
+
     }
     private static final String SZ_STOCK_LIST_PATH = "./src/main/resources/SZAstockList.csv";
     private static final String SH_STOCK_LIST_PATH = "./src/main/resources/SHAstockList.csv";

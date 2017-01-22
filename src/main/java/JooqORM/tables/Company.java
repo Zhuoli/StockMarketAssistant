@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Company extends TableImpl<CompanyRecord> {
 
-    private static final long serialVersionUID = 1874719104;
+    private static final long serialVersionUID = 1493684576;
 
     /**
      * The reference instance of <code>ChineseStock.company</code>
@@ -103,12 +103,12 @@ public class Company extends TableImpl<CompanyRecord> {
     /**
      * The column <code>ChineseStock.company.pbr</code>. 市净率 Price-to-book ratio
      */
-    public final TableField<CompanyRecord, Integer> PBR = createField("pbr", org.jooq.impl.SQLDataType.INTEGER, this, "市净率 Price-to-book ratio");
+    public final TableField<CompanyRecord, Double> PBR = createField("pbr", org.jooq.impl.SQLDataType.DOUBLE, this, "市净率 Price-to-book ratio");
 
     /**
      * The column <code>ChineseStock.company.per</code>. 市盈率
      */
-    public final TableField<CompanyRecord, Integer> PER = createField("per", org.jooq.impl.SQLDataType.INTEGER, this, "市盈率");
+    public final TableField<CompanyRecord, Double> PER = createField("per", org.jooq.impl.SQLDataType.DOUBLE, this, "市盈率");
 
     /**
      * The column <code>ChineseStock.company.tradingvalue</code>. 成交额

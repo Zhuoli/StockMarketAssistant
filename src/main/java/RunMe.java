@@ -2,6 +2,7 @@ import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
 import dataEngineer.sinaFinance.SinaWebParser;
 
+import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.Arrays;
 
@@ -16,6 +17,8 @@ public class RunMe
         StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
         StockCompanyCollection.CompanyObject[] companies = companyCollection.queryCompanyList();
         DatabaseManager databaseManager = null;
+        SinaWebParser sinaWebParser = new SinaWebParser();
+
         try {
             databaseManager = DatabaseManager.GetDatabaseManagerInstance("resourceConfig.xml").Authenticate();
             databaseManager.insertOnDuplicateUpdate(companies);
@@ -27,19 +30,13 @@ public class RunMe
             System.exit(1);
         }
 
+        for(StockCompanyCollection.CompanyObject companyObject : companies) {
 
-//
-//
-//        String hair = Arrays.stream(companies).filter(f -> f.shortName.equals("青岛海尔")).findFirst().get().aMargetCode;
-//        String pingan = Arrays.stream(companies).filter(f -> f.shortName.equals("平安银行")).findFirst().get().aMargetCode;
-//        SinaWebParser sinaWebParser = new SinaWebParser();
-//
-//
-//        // sh601633
-//        SharesQuote quote = sinaWebParser.queryCompanyStock(hair);
-//        SharesQuote pinganprice = sinaWebParser.queryCompanyStock(pingan);
-//
-
+            SharesQuote quote = sinaWebParser.queryCompanyStock(companyObject.aMargetCode);
+            companyObject.PBR = quote.price2BookRatio;
+            companyObject.PER = quote.price2EarningRatio;
+            companyObject.currentprice = quote.currentPrice;
+        }
         System.exit(0);
     }
 }

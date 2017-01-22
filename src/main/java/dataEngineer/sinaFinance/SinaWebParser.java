@@ -79,6 +79,8 @@ public class SinaWebParser {
         System.out.println("Quoting url: " + url);
         WebDriver.get(url);
         String currentPrice = WebDriver.findElementById("price").getText();
+        currentPrice = currentPrice.matches("[0-9]+(\\.[0-9]*)?.*") ? currentPrice.trim() : "0";
+
         tableMap.put(PRICE, currentPrice);
 
         // Retrieve table
@@ -92,8 +94,8 @@ public class SinaWebParser {
         for(int idx =0; idx<keyValuePairs.length/2; idx++){
 
             // Value must contains decimal or integer otherwise replace it to -1
-            String value = keyValuePairs[idx*2+1].matches("[0-9]+(\\.[0-9]*)?.*") ? keyValuePairs[idx*2+1].trim() : "-1";
-            tableMap.put(keyValuePairs[idx*2].replace("：",""), value);
+            String value = keyValuePairs[idx*2+1].matches("[0-9]+(\\.[0-9]*)?.*") ? keyValuePairs[idx*2+1].trim() : "0";
+            tableMap.put(keyValuePairs[idx*2].replace("：",""), value.trim());
         }
         return tableMap;
     }
