@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Company extends TableImpl<CompanyRecord> {
 
-    private static final long serialVersionUID = 1493684576;
+    private static final long serialVersionUID = 340156673;
 
     /**
      * The reference instance of <code>ChineseStock.company</code>
@@ -58,12 +58,12 @@ public class Company extends TableImpl<CompanyRecord> {
     /**
      * The column <code>ChineseStock.company.capitalizationvalue</code>. 流通市值
      */
-    public final TableField<CompanyRecord, Double> CAPITALIZATIONVALUE = createField("capitalizationvalue", org.jooq.impl.SQLDataType.DOUBLE, this, "流通市值");
+    public final TableField<CompanyRecord, String> CAPITALIZATIONVALUE = createField("capitalizationvalue", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "流通市值");
 
     /**
-     * The column <code>ChineseStock.company.closeprice</code>. 昨日收盘价
+     * The column <code>ChineseStock.company.close_price</code>. 昨日收盘价
      */
-    public final TableField<CompanyRecord, Double> CLOSEPRICE = createField("closeprice", org.jooq.impl.SQLDataType.DOUBLE, this, "昨日收盘价");
+    public final TableField<CompanyRecord, Double> CLOSE_PRICE = createField("close_price", org.jooq.impl.SQLDataType.DOUBLE, this, "昨日收盘价");
 
     /**
      * The column <code>ChineseStock.company.companyname</code>. 公司名称
@@ -81,14 +81,24 @@ public class Company extends TableImpl<CompanyRecord> {
     public final TableField<CompanyRecord, Timestamp> CURRENTPRICETIMESTAMP = createField("currentpricetimestamp", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
     /**
+     * The column <code>ChineseStock.company.highest_price</code>.
+     */
+    public final TableField<CompanyRecord, Double> HIGHEST_PRICE = createField("highest_price", org.jooq.impl.SQLDataType.DOUBLE.nullable(false), this, "");
+
+    /**
      * The column <code>ChineseStock.company.last_update_date_time</code>. 最后一次更新时间
      */
     public final TableField<CompanyRecord, Timestamp> LAST_UPDATE_DATE_TIME = createField("last_update_date_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "最后一次更新时间");
 
     /**
+     * The column <code>ChineseStock.company.lowest_price</code>.
+     */
+    public final TableField<CompanyRecord, Double> LOWEST_PRICE = createField("lowest_price", org.jooq.impl.SQLDataType.DOUBLE.nullable(false), this, "");
+
+    /**
      * The column <code>ChineseStock.company.marketcap</code>. 总市值
      */
-    public final TableField<CompanyRecord, Double> MARKETCAP = createField("marketcap", org.jooq.impl.SQLDataType.DOUBLE, this, "总市值");
+    public final TableField<CompanyRecord, String> MARKETCAP = createField("marketcap", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "总市值");
 
     /**
      * The column <code>ChineseStock.company.openprice</code>. 开盘价
@@ -98,7 +108,7 @@ public class Company extends TableImpl<CompanyRecord> {
     /**
      * The column <code>ChineseStock.company.oscillation</code>. 股票振幅
      */
-    public final TableField<CompanyRecord, Double> OSCILLATION = createField("oscillation", org.jooq.impl.SQLDataType.DOUBLE, this, "股票振幅");
+    public final TableField<CompanyRecord, String> OSCILLATION = createField("oscillation", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "股票振幅");
 
     /**
      * The column <code>ChineseStock.company.pbr</code>. 市净率 Price-to-book ratio
@@ -113,17 +123,17 @@ public class Company extends TableImpl<CompanyRecord> {
     /**
      * The column <code>ChineseStock.company.tradingvalue</code>. 成交额
      */
-    public final TableField<CompanyRecord, Double> TRADINGVALUE = createField("tradingvalue", org.jooq.impl.SQLDataType.DOUBLE, this, "成交额");
+    public final TableField<CompanyRecord, String> TRADINGVALUE = createField("tradingvalue", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "成交额");
 
     /**
      * The column <code>ChineseStock.company.tradingvolume</code>. 成交量
      */
-    public final TableField<CompanyRecord, Double> TRADINGVOLUME = createField("tradingvolume", org.jooq.impl.SQLDataType.DOUBLE, this, "成交量");
+    public final TableField<CompanyRecord, String> TRADINGVOLUME = createField("tradingvolume", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "成交量");
 
     /**
      * The column <code>ChineseStock.company.turnoverrate</code>. 换手率
      */
-    public final TableField<CompanyRecord, Double> TURNOVERRATE = createField("turnoverrate", org.jooq.impl.SQLDataType.DOUBLE, this, "换手率");
+    public final TableField<CompanyRecord, String> TURNOVERRATE = createField("turnoverrate", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "换手率");
 
     /**
      * Create a <code>ChineseStock.company</code> table reference

@@ -15,13 +15,17 @@ public class SharesQuote {
     public double lowestPrice;
     public double closePrice;
 
+    // 成交量
     public String dealVolum;
+
+    // 成交额
     public String dealValue;
     // 总市值
     public String marketCap;
     // 流通市值
     public String tradingCap;
 
+    // 振幅
     public String oscillation;
     // 换手率
     public String exchangeRatio;

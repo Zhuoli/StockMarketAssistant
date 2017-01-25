@@ -219,23 +219,55 @@ public class DatabaseManager {
                     Arrays.stream(companyObjects)
                             .map(companyObject -> creator
                                     .insertInto(COMPANY, COMPANY.STOCKID, COMPANY.COMPANYNAME,
+                                            COMPANY.CURRENTPRICE,
                                             COMPANY.CURRENTPRICETIMESTAMP,
-                                            COMPANY.LAST_UPDATE_DATE_TIME, COMPANY.PBR,
-                                            COMPANY.PER, COMPANY.CURRENTPRICE)
+                                            COMPANY.HIGHEST_PRICE,
+                                            COMPANY.LOWEST_PRICE,
+                                            COMPANY.CLOSE_PRICE,
+                                            COMPANY.LAST_UPDATE_DATE_TIME,
+                                            COMPANY.PBR,
+                                            COMPANY.PER,
+                                            COMPANY.CAPITALIZATIONVALUE,
+                                            COMPANY.MARKETCAP,
+                                            COMPANY.TRADINGVOLUME,
+                                            COMPANY.TRADINGVALUE,
+                                            COMPANY.OSCILLATION,
+                                            COMPANY.TURNOVERRATE
+                                    )
                                     .values(companyObject.stockid, companyObject.companyname,
+                                            companyObject.currentPrice,
                                             Timestamp.valueOf(LocalDateTime.now()),
+                                            companyObject.highestPrice,
+                                            companyObject.lowestPrice,
+                                            companyObject.closePrice,
                                             Timestamp.valueOf(LocalDateTime.now()),
                                             companyObject.price2BookRatio,
                                             companyObject.price2EarningRatio,
-                                            companyObject.currentPrice)
+                                            companyObject.tradingCap,
+                                            companyObject.marketCap,
+                                            companyObject.dealVolum,
+                                            companyObject.dealValue,
+                                            companyObject.oscillation,
+                                            companyObject.exchangeRatio
+                                    )
                                     .onDuplicateKeyUpdate()
                                     .set(COMPANY.CURRENTPRICE, companyObject.currentPrice)
                                     .set(COMPANY.PBR, companyObject.price2BookRatio)
                                     .set(COMPANY.PER, companyObject.price2EarningRatio)
                                     .set(COMPANY.OPENPRICE, companyObject.openPrice)
-                                    .set(COMPANY.CLOSEPRICE, companyObject.closePrice)
-                                    .set(COMPANY.CURRENTPRICETIMESTAMP, Timestamp.valueOf(LocalDateTime.now()))
-                                    .set(COMPANY.LAST_UPDATE_DATE_TIME, Timestamp.valueOf(LocalDateTime.now())))
+                                    .set(COMPANY.HIGHEST_PRICE, companyObject.highestPrice)
+                                    .set(COMPANY.LOWEST_PRICE, companyObject.lowestPrice)
+                                    .set(COMPANY.CLOSE_PRICE, companyObject.closePrice)
+                                    .set(COMPANY.CURRENTPRICETIMESTAMP,
+                                            Timestamp.valueOf(LocalDateTime.now()))
+                                    .set(COMPANY.LAST_UPDATE_DATE_TIME,
+                                            Timestamp.valueOf(LocalDateTime.now()))
+                                    .set(COMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
+                                    .set(COMPANY.MARKETCAP, companyObject.marketCap)
+                                    .set(COMPANY.TRADINGVALUE, companyObject.dealValue)
+                                    .set(COMPANY.TRADINGVOLUME, companyObject.dealVolum)
+                                    .set(COMPANY.OSCILLATION, companyObject.oscillation)
+                                    .set(COMPANY.TURNOVERRATE, companyObject.exchangeRatio))
                             .collect(Collectors.toList());
 
             creator.batch(list).execute();
