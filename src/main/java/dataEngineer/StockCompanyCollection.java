@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
 /**
@@ -12,8 +13,8 @@ import org.junit.Assert;
  */
 public final class StockCompanyCollection {
 
-    private static final String SZ_STOCK_LIST_PATH = "./src/main/resources/SZAstockList.csv";
-    private static final String SH_STOCK_LIST_PATH = "./src/main/resources/SHAstockList.csv";
+    private static final String SZ_STOCK_LIST_PATH = "SZAstockList.csv";
+    private static final String SH_STOCK_LIST_PATH = "SHAstockList.csv";
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
     private  static StockCompanyCollection thisInstance = null;
@@ -30,11 +31,11 @@ public final class StockCompanyCollection {
         return thisInstance;
     }
 
-    public SharesQuote[] queryCompanyList(){
+    public SharesQuote[] queryCompanyList(boolean isDebug){
         if (companyObjectCollection == null){
             companyObjectCollection = new LinkedList<>();
-            companyObjectCollection.addAll(this.readSZAStockCompanyList(SZ_STOCK_LIST_PATH));
-            companyObjectCollection.addAll(this.readSHAStockCompanyList(SH_STOCK_LIST_PATH));
+            companyObjectCollection.addAll(this.readSZAStockCompanyList(isDebug? "./src/main/resources/" + SZ_STOCK_LIST_PATH : SZ_STOCK_LIST_PATH));
+            companyObjectCollection.addAll(this.readSHAStockCompanyList(isDebug? "./src/main/resources/" + SH_STOCK_LIST_PATH : SH_STOCK_LIST_PATH));
         }
         return companyObjectCollection.toArray(new SharesQuote[0]);
     }
@@ -49,31 +50,30 @@ public final class StockCompanyCollection {
         System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
         Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
         List<SharesQuote> companyObjectList = new LinkedList<>();
-        try(BufferedReader scanner = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile), "UTF-16")))
+        try(Scanner scanner = new Scanner(new File(csvFile)))
         {
-            String header = scanner.readLine();
-            Assert.assertTrue(header.length()>0);
-            List<String> headers = parseLine(header, '\t');
-            Assert.assertNotNull(headers);
-            Assert.assertEquals("公司代码", headers.get(0).substring(0, 4));
-            Assert.assertEquals("公司简称", headers.get(1).substring(0, 4));
-            Assert.assertEquals("A股代码", headers.get(2).substring(0, 4));
-            Assert.assertEquals("A股简称", headers.get(3).substring(0, 4));
-            Assert.assertEquals("A股上市日期", headers.get(4));
-            Assert.assertEquals("A股总股本", headers.get(5));
-            Assert.assertEquals("A股流通股本", headers.get(6));
+            if (scanner.hasNext()) {
+                List<String> headers = parseLine(scanner.nextLine());
+                Assert.assertNotNull(headers);
+                Assert.assertTrue(headers.size()>=7);
+                Assert.assertEquals("公司代码", headers.get(0).substring(1, 5));
+                Assert.assertEquals("公司简称", headers.get(1).substring(0, 4));
+                Assert.assertEquals("A股代码", headers.get(2).substring(0, 4));
+                Assert.assertEquals("A股简称", headers.get(3).substring(0, 4));
+                Assert.assertEquals("A股上市日期", headers.get(4));
+                Assert.assertEquals("A股总股本", headers.get(5));
+                Assert.assertEquals("A股流通股本", headers.get(6));
+            }
 
             // Read row
-            String row =scanner.readLine();
-            while (row!= null && row.length()!=0) {
-                List<String> line = parseLine(row, '\t');
+            while (scanner.hasNext()) {
+                List<String> line = parseLine(scanner.nextLine());
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 7, line.size());
                 SharesQuote companyObject = new SharesQuote();
 //                companyObject.code = "sh" + line.get(0).trim();
                 companyObject.stockid = "sh" + line.get(2).trim();
                 companyObject.companyname = line.get(3).trim();
                 companyObjectList.add(companyObject);
-                row=scanner.readLine();
             }
 
         }catch (IOException exc){
@@ -106,10 +106,8 @@ public final class StockCompanyCollection {
                 List<String> line = parseLine(scanner.nextLine());
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 20, line.size());
                 SharesQuote companyObject = new SharesQuote();
-//                companyObject.stockid = "sz" + line.get(0).trim();
                 companyObject.companyname = line.get(1);
-//                companyObject.fullName = line.get(2);
-                companyObject.stockid = "sz" + line.get(5).trim();
+                companyObject.stockid = "sz" + StringUtils.repeat("0", Math.max(0, 6-line.get(5).length())) + line.get(5);
                 companyObject.officialWebUrl = line.get(19);
                 companyObjectList.add(companyObject);
             }

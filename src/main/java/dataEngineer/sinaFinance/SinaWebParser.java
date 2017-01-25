@@ -1,24 +1,31 @@
 package dataEngineer.sinaFinance;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlDivision;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import dataEngineer.SharesQuote;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriverService;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 /**
  * Represents a Sina Finance Web Parser.
  */
 public class SinaWebParser {
 
-    final static String SinaFinanceBase = "http://finance.sina.com.cn/realstock/company/%s/nc.shtml";
+    final static String SinaFinanceBase =
+            "http://finance.sina.com.cn/realstock/company/%s/nc.shtml";
 
     // TODO: Hardcode current PHANTOM_PATH, may want update later.
-    final static String PHANTOM_PATH = new File(".").getAbsolutePath() + "/src/main/resources/phantomjs/bin/phantomjs";
+    final static String PHANTOM_PATH = new File(".").getAbsolutePath()
+            + "/src/main/resources/phantomjs/bin/phantomjs";
 
     final static String PRICE = "price";
 
@@ -37,21 +44,11 @@ public class SinaWebParser {
     final static String PTE = "市盈率TTM";
     final static String PTB = "市净率";
 
-    // Initialize Web driver
-    static DesiredCapabilities caps = new DesiredCapabilities();
-    static {
-        caps.setJavascriptEnabled(true);
-        caps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, PHANTOM_PATH);
-    }
-
-    // Set web drover to PhantomJSDriver
-    final PhantomJSDriver WebDriver = new PhantomJSDriver(caps);
-
-    public SinaWebParser(){
+    public SinaWebParser() {
         // Does nothing
     }
 
-    public SharesQuote queryCompanyStock(String symbol){
+    public SharesQuote queryCompanyStock(String symbol) throws IOException{
         HashMap<String, String> map = this.quoteCompanyDetail(symbol);
         SharesQuote sharesQuote = new SharesQuote();
         sharesQuote.currentPrice = Double.parseDouble(map.get(PRICE));
@@ -73,30 +70,49 @@ public class SinaWebParser {
         return sharesQuote;
     }
 
-    public HashMap<String, String> quoteCompanyDetail(String symbol) {
+    public HashMap<String, String> quoteCompanyDetail(String symbol) throws IOException{
+
         HashMap<String, String> tableMap = new HashMap<>();
         String url = String.format(SinaFinanceBase, symbol);
         System.out.println("Quoting url: " + url);
-        WebDriver.get(url);
-        String currentPrice = WebDriver.findElementById("price").getText();
+        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+
+        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
+
+        final WebClient webClient = new WebClient();
+        webClient.getOptions().setThrowExceptionOnScriptError(false);
+        webClient.getOptions().setCssEnabled(false);
+        long starttime = System.currentTimeMillis();
+        final HtmlPage page = webClient.getPage(url);
+        long endtime = System.currentTimeMillis();
+        System.out.println((endtime - starttime)/1000.0 + " seconds slipped to get page content.");
+
+
+        // Normalize current price
+        String currentPrice = page.getElementById("price").getTextContent();
         currentPrice = currentPrice.matches("[0-9]+(\\.[0-9]*)?.*") ? currentPrice.trim() : "0";
 
         tableMap.put(PRICE, currentPrice);
 
         // Retrieve table
-        WebElement detailTable = WebDriver.findElementById("hqDetails"); // Detail table
-        String tableStr = detailTable.getText();
-        tableStr = tableStr.replace("  ", "");
+        DomElement detailTable = page.getElementById("hqDetails"); // Detail table
+        String tableStr = detailTable.getTextContent();
+        tableStr = tableStr.replaceAll("  ", "");
         String[] keyValuePairs = tableStr.split(" |\n");
+        keyValuePairs = Arrays.stream(keyValuePairs).filter(str -> !str.equals("")).map(str -> str.replaceAll("[：|  |]", "")).toArray(String[]::new);
 
         // Data validation
-        Assert.assertTrue("Key value length should be even", keyValuePairs.length % 2 ==0);
-        for(int idx =0; idx<keyValuePairs.length/2; idx++){
+        Assert.assertTrue("Key value length should be even", keyValuePairs.length % 2 == 0);
+        for (int idx = 0; idx < keyValuePairs.length / 2; idx++) {
 
             // Value must contains decimal or integer otherwise replace it to -1
-            String value = keyValuePairs[idx*2+1].matches("[0-9]+(\\.[0-9]*)?.*") ? keyValuePairs[idx*2+1].trim() : "0";
-            tableMap.put(keyValuePairs[idx*2].replace("：",""), value.trim());
+            String value =
+                    keyValuePairs[idx * 2 + 1].matches("[0-9]+(\\.[0-9]*)?.*") ? keyValuePairs[idx * 2 + 1]
+                            .trim() : "0";
+            tableMap.put(keyValuePairs[idx * 2], value);
         }
+
         return tableMap;
     }
 }
