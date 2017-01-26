@@ -37,8 +37,8 @@ public final class StockCompanyCollection {
 
         if (companyObjectCollection == null){
             companyObjectCollection = new LinkedList<>();
-            companyObjectCollection.addAll(this.readSZAStockCompanyList(isDebug? "./src/main/resources/" + SZ_STOCK_LIST_PATH : SZ_STOCK_LIST_PATH));
-            companyObjectCollection.addAll(this.readSHAStockCompanyList(isDebug? "./src/main/resources/" + SH_STOCK_LIST_PATH : SH_STOCK_LIST_PATH));
+            companyObjectCollection.addAll(this.readSZAStockCompanyList(isDebug? "./src/main/resources/" + SZ_STOCK_LIST_PATH : "./" + SZ_STOCK_LIST_PATH));
+            companyObjectCollection.addAll(this.readSHAStockCompanyList(isDebug? "./src/main/resources/" + SH_STOCK_LIST_PATH : "./" + SH_STOCK_LIST_PATH));
         }
         return companyObjectCollection.toArray(new SharesQuote[0]);
     }
