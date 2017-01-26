@@ -113,6 +113,8 @@ public class SinaWebParser {
             tableMap.put(keyValuePairs[idx * 2], value);
         }
 
+        // Closes all opened windows, stopping all background JavaScript processing
+        webClient.close();
         return tableMap;
     }
 }
