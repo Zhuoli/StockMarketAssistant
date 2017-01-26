@@ -32,6 +32,9 @@ public final class StockCompanyCollection {
     }
 
     public SharesQuote[] queryCompanyList(boolean isDebug){
+        String msg = isDebug ? "Application is run in IDE" : "Application is run in jar";
+        System.out.println(msg);
+
         if (companyObjectCollection == null){
             companyObjectCollection = new LinkedList<>();
             companyObjectCollection.addAll(this.readSZAStockCompanyList(isDebug? "./src/main/resources/" + SZ_STOCK_LIST_PATH : SZ_STOCK_LIST_PATH));
