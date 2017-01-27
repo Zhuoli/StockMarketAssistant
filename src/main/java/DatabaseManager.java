@@ -29,6 +29,8 @@ import static JooqORM.Tables.COMPANY;
  */
 public class DatabaseManager {
 
+    private static DatabaseManager databaseManager;
+
     private String url;
     private String userName;
     private String password;
@@ -57,46 +59,68 @@ public class DatabaseManager {
      * @return
      */
     public static DatabaseManager GetDatabaseManagerInstance(String pathString) {
-        Path currentPath = Paths.get("./");
-        System.out.println("Currrent path: " + currentPath.toAbsolutePath());
-        Path path = Paths.get("src", "main", "resources", pathString);
 
-        if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS))
-            path = Paths.get(pathString);
+        if (DatabaseManager.databaseManager == null) {
 
-        if (Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
-            try {
+            Path currentPath = Paths.get("./");
+            System.out.println("Currrent path: " + currentPath.toAbsolutePath());
+            Path path = Paths.get("src", "main", "resources", pathString);
 
-                // Create XML object and read values from the given path
-                DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                Document doc =
-                        builder.parse(new DataInputStream(new FileInputStream(path.toFile())));
-                Element documentElement = doc.getDocumentElement();
-                Element databasesNode =
-                        (Element) documentElement.getElementsByTagName("Databases").item(0);
+            if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS))
+                path = Paths.get(pathString);
 
-                String url = databasesNode.getElementsByTagName("Url").item(0).getTextContent();
-                String database =
-                        databasesNode.getElementsByTagName("Database").item(0).getTextContent();
-                String user = databasesNode.getElementsByTagName("User").item(0).getTextContent();
-                String password =
-                        databasesNode.getElementsByTagName("Password").item(0).getTextContent();
+            if (Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+                try {
 
-                return new DatabaseManager(url, database, user, password);
-            } catch (Exception e) {
-                Logger.getGlobal().log(Level.SEVERE,
-                        "Failed to read configuration file from " + pathString, e);
+                    // Create XML object and read values from the given path
+                    DocumentBuilder builder =
+                            DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                    Document doc =
+                            builder.parse(new DataInputStream(new FileInputStream(path.toFile())));
+                    Element documentElement = doc.getDocumentElement();
+                    Element databasesNode =
+                            (Element) documentElement.getElementsByTagName("Databases").item(0);
+
+                    String url = databasesNode.getElementsByTagName("Url").item(0).getTextContent();
+                    String database =
+                            databasesNode.getElementsByTagName("Database").item(0).getTextContent();
+                    String user =
+                            databasesNode.getElementsByTagName("User").item(0).getTextContent();
+                    String password =
+                            databasesNode.getElementsByTagName("Password").item(0).getTextContent();
+
+                    return new DatabaseManager(url, database, user, password);
+                } catch (Exception e) {
+                    Logger.getGlobal().log(Level.SEVERE,
+                            "Failed to read configuration file from " + pathString, e);
+                }
+                DatabaseManager.databaseManager = new DatabaseManager();
+            } else {
+                DatabaseManager.databaseManager = new DatabaseManager();
             }
-            return new DatabaseManager();
-        } else {
-            return new DatabaseManager();
         }
+
+        return DatabaseManager.databaseManager;
     }
 
     public DatabaseManager Authenticate() throws SQLException {
         this.getDBJooqCreate();
         this.conn.close();
         return this;
+    }
+
+    public static void close() {
+        if (DatabaseManager.databaseManager == null)
+            return;
+
+        if (DatabaseManager.databaseManager.globalCreate != null)
+            DatabaseManager.databaseManager.globalCreate.close();
+        if (DatabaseManager.databaseManager.conn != null)
+            try {
+                DatabaseManager.databaseManager.conn.close();
+            } catch (Exception exc) {
+
+            }
     }
 
     private Connection conn = null;
@@ -219,37 +243,24 @@ public class DatabaseManager {
                     Arrays.stream(companyObjects)
                             .map(companyObject -> creator
                                     .insertInto(COMPANY, COMPANY.STOCKID, COMPANY.COMPANYNAME,
-                                            COMPANY.CURRENTPRICE,
-                                            COMPANY.CURRENTPRICETIMESTAMP,
-                                            COMPANY.HIGHEST_PRICE,
-                                            COMPANY.LOWEST_PRICE,
-                                            COMPANY.CLOSE_PRICE,
-                                            COMPANY.LAST_UPDATE_DATE_TIME,
-                                            COMPANY.PBR,
-                                            COMPANY.PER,
-                                            COMPANY.CAPITALIZATIONVALUE,
-                                            COMPANY.MARKETCAP,
-                                            COMPANY.TRADINGVOLUME,
-                                            COMPANY.TRADINGVALUE,
-                                            COMPANY.OSCILLATION,
-                                            COMPANY.TURNOVERRATE
-                                    )
+                                            COMPANY.CURRENTPRICE, COMPANY.CURRENTPRICETIMESTAMP,
+                                            COMPANY.HIGHEST_PRICE, COMPANY.LOWEST_PRICE,
+                                            COMPANY.CLOSE_PRICE, COMPANY.LAST_UPDATE_DATE_TIME,
+                                            COMPANY.PBR, COMPANY.PER, COMPANY.CAPITALIZATIONVALUE,
+                                            COMPANY.MARKETCAP, COMPANY.TRADINGVOLUME,
+                                            COMPANY.TRADINGVALUE, COMPANY.OSCILLATION,
+                                            COMPANY.TURNOVERRATE)
                                     .values(companyObject.stockid, companyObject.companyname,
                                             companyObject.currentPrice,
                                             Timestamp.valueOf(LocalDateTime.now()),
-                                            companyObject.highestPrice,
-                                            companyObject.lowestPrice,
+                                            companyObject.highestPrice, companyObject.lowestPrice,
                                             companyObject.closePrice,
                                             Timestamp.valueOf(LocalDateTime.now()),
                                             companyObject.price2BookRatio,
                                             companyObject.price2EarningRatio,
-                                            companyObject.tradingCap,
-                                            companyObject.marketCap,
-                                            companyObject.dealVolum,
-                                            companyObject.dealValue,
-                                            companyObject.oscillation,
-                                            companyObject.exchangeRatio
-                                    )
+                                            companyObject.tradingCap, companyObject.marketCap,
+                                            companyObject.dealVolum, companyObject.dealValue,
+                                            companyObject.oscillation, companyObject.exchangeRatio)
                                     .onDuplicateKeyUpdate()
                                     .set(COMPANY.CURRENTPRICE, companyObject.currentPrice)
                                     .set(COMPANY.PBR, companyObject.price2BookRatio)
@@ -274,6 +285,26 @@ public class DatabaseManager {
 
             companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
         }
+    }
+
+    public Set<String> getExistingStockIDs() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+
+            DSLContext creator = this.getDBJooqCreate();
+            Result<Record1<String>> r = creator.select(COMPANY.STOCKID).from(COMPANY).fetch();
+            r.toArray(new Record[0])[0].get(COMPANY.field(COMPANY.STOCKID));
+
+            return Arrays
+                    .stream(r.toArray(new Record[0]))
+                    .map(record -> record.get(COMPANY.field(COMPANY.STOCKID)))
+                    .collect(Collectors.toSet());
+        } catch (ClassNotFoundException e) {
+            Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
+        } catch (SQLException e) {
+            Logger.getGlobal().log(Level.SEVERE, "SQL Exception", e);
+        }
+        return null;
     }
 
     /**

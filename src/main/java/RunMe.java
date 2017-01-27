@@ -5,12 +5,8 @@ import dataEngineer.sinaFinance.SinaWebParser;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 import org.apache.commons.cli.*;
 
@@ -32,81 +28,103 @@ public class RunMe {
             CommandLine cmd = parser.parse(options, args);
 
             new RunMe().run(cmd.hasOption("d"));
-        }catch (ParseException exc)
-        {
+        } catch (ParseException exc) {
             System.err.println("Arguments parse exception: " + exc.getMessage());
             System.exit(1);
         }
     }
 
     public void run(boolean isIde) {
-        System.out.println("HHa alive");
+        try {
+            System.out.println("HHa alive");
 
-        StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
-        SharesQuote[] companies = companyCollection.queryCompanyList(isIde);
+            StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
+            SharesQuote[] companies = companyCollection.queryCompanyList(isIde);
 
-        DatabaseManager databaseManager = this.initializeDataManager();
-        if (databaseManager == null) {
-            System.err.println("Failed to initialize database manager. \t Quit.");
-            System.exit(1);
-        }
-
-        System.out.println("Company size: " + companies.length);
-        System.out.println("Querying company stock from webpage....");
-
-        ExecutorService executorService = Executors.newFixedThreadPool(WEB_PARSER_SIZE);
-
-        LinkedBlockingQueue<SharesQuote> sharesQuoteList =
-                new LinkedBlockingQueue<>(companies.length);
-
-        // Shuffle this array so that the companies at the tail of this array still has the chance to be queried
-        List<SharesQuote> shuffleList = Arrays.asList(companies);
-        Collections.shuffle(shuffleList);
-
-        // Submit company query task
-        for (SharesQuote companyObject : shuffleList) {
-            executorService.submit(() -> {
-                try {
-                    SinaWebParser sinaWebParser = new SinaWebParser();
-                    SharesQuote quote = sinaWebParser.queryCompanyStock(companyObject.stockid);
-                    quote.stockid = companyObject.stockid;
-                    quote.companyname = companyObject.companyname;
-                    quote.officialWebUrl = companyObject.officialWebUrl;
-                    sharesQuoteList.offer(quote);
-                } catch (IOException exc) {
-                    exc.printStackTrace();
-                }
-            });
-        }
-
-        while (!executorService.isTerminated()) {
-
-            try {
-                // Poll wait for three minutes
-                SharesQuote sharesQuote = sharesQuoteList.poll(5, TimeUnit.MINUTES);
-                if (sharesQuote == null)
-                    continue;
-                databaseManager.insertOnDuplicateUpdate(sharesQuote);
-                System.out.println("Succeed on update company: " + sharesQuote.companyname
-                        + ";  StockID: " + sharesQuote.stockid);
-
-            } catch (InterruptedException exc) {
-                exc.printStackTrace();
-
-                // Break while loop if time out and shareQuoteList is zero
-                if (sharesQuoteList.size() == 0)
-                    break;
-            } catch (SQLException exc) {
-                exc.printStackTrace();
-                System.exit(1);
-            } catch (ClassNotFoundException exc) {
-                exc.printStackTrace();
+            DatabaseManager databaseManager = this.initializeDataManager();
+            if (databaseManager == null) {
+                System.err.println("Failed to initialize database manager. \t Quit.");
                 System.exit(1);
             }
-        }
 
-        System.out.println("Job done. Time: " + LocalDateTime.now());
-        System.exit(0);
+            Set<String> existingStockIDsSet = databaseManager.getExistingStockIDs();
+
+            System.out.println("Company size: " + companies.length);
+            System.out.println("Querying company stock from webpage....");
+
+            ExecutorService executorService = Executors.newFixedThreadPool(WEB_PARSER_SIZE);
+
+            LinkedBlockingQueue<SharesQuote> sharesQuoteList =
+                    new LinkedBlockingQueue<>(companies.length);
+
+            this.sortArray(existingStockIDsSet, companies);
+
+            // Submit company query task
+            for (SharesQuote companyObject : companies) {
+                executorService.submit(() -> {
+                    try {
+                        SinaWebParser sinaWebParser = new SinaWebParser();
+                        SharesQuote quote = sinaWebParser.queryCompanyStock(companyObject.stockid);
+                        quote.stockid = companyObject.stockid;
+                        quote.companyname = companyObject.companyname;
+                        quote.officialWebUrl = companyObject.officialWebUrl;
+                        sharesQuoteList.offer(quote);
+                    } catch (IOException exc) {
+                        exc.printStackTrace();
+                    }
+                });
+            }
+
+            while (!executorService.isTerminated()) {
+
+                try {
+                    // Poll wait for three minutes
+                    SharesQuote sharesQuote = sharesQuoteList.poll(5, TimeUnit.MINUTES);
+                    if (sharesQuote == null)
+                        continue;
+                    databaseManager.insertOnDuplicateUpdate(sharesQuote);
+                    System.out.println("Succeed on update company: " + sharesQuote.companyname
+                            + ";  StockID: " + sharesQuote.stockid);
+
+                } catch (InterruptedException exc) {
+                    exc.printStackTrace();
+
+                    // Break while loop if time out and shareQuoteList is zero
+                    if (sharesQuoteList.size() == 0)
+                        break;
+                } catch (SQLException exc) {
+                    exc.printStackTrace();
+                    System.exit(1);
+                } catch (ClassNotFoundException exc) {
+                    exc.printStackTrace();
+                    System.exit(1);
+                }
+            }
+
+            System.out.println("Job done. Time: " + LocalDateTime.now());
+            System.exit(0);
+        } finally {
+            DatabaseManager.close();
+        }
+    }
+
+    private void sortArray(Set<String> set, SharesQuote[] array) {
+
+        if (set == null || array == null)
+            return;
+
+        int nextSeenIdx = array.length - 1;
+        for (int idx = 0; idx <= nextSeenIdx; idx++) {
+            // If current stock is seen in records
+            if (set.contains(array[idx].stockid)) {
+                // Move this stock to tail
+                SharesQuote tmp = array[nextSeenIdx];
+                array[nextSeenIdx] = array[idx];
+                array[idx] = tmp;
+                nextSeenIdx--;
+                idx--;
+            }
+        }
     }
 
     private DatabaseManager initializeDataManager() {
