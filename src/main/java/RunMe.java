@@ -1,6 +1,5 @@
 import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
-import dataEngineer.sinaFinance.SinaWebParser;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -8,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 
+import dataEngineer.financeWebEngine.XueqiuWebParser;
 import org.apache.commons.cli.*;
 
 /**
@@ -17,6 +17,7 @@ public class RunMe {
     final static int WEB_PARSER_SIZE = 5;
 
     public static void main(String[] args) {
+
         // create Options object
         Options options = new Options();
 
@@ -63,8 +64,8 @@ public class RunMe {
             for (SharesQuote companyObject : companies) {
                 executorService.submit(() -> {
                     try {
-                        SinaWebParser sinaWebParser = new SinaWebParser();
-                        SharesQuote quote = sinaWebParser.queryCompanyStock(companyObject.stockid);
+                        XueqiuWebParser webParser = new XueqiuWebParser();
+                        SharesQuote quote = webParser.queryCompanyStock(companyObject.stockid);
                         quote.stockid = companyObject.stockid;
                         quote.companyname = companyObject.companyname;
                         quote.officialWebUrl = companyObject.officialWebUrl;

@@ -1,9 +1,7 @@
-package dataEngineer.sinaFinance;
+package dataEngineer.financeWebEngine;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import dataEngineer.SharesQuote;
 import org.apache.commons.logging.LogFactory;
@@ -18,7 +16,7 @@ import java.util.logging.Level;
 /**
  * Represents a Sina Finance Web Parser.
  */
-public class SinaWebParser {
+public class SinaWebParser implements IWebParser {
 
     final static String SinaFinanceBase =
             "http://finance.sina.com.cn/realstock/company/%s/nc.shtml";
