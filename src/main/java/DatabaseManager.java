@@ -287,6 +287,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Gets existing stock IDs from Database, returns null if caught exception.
+     * @return Stock Id set.
+     */
     public Set<String> getExistingStockIDs() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -299,6 +303,25 @@ public class DatabaseManager {
                     .stream(r.toArray(new Record[0]))
                     .map(record -> record.get(COMPANY.field(COMPANY.STOCKID)))
                     .collect(Collectors.toSet());
+        } catch (ClassNotFoundException e) {
+            Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
+        } catch (SQLException e) {
+            Logger.getGlobal().log(Level.SEVERE, "SQL Exception", e);
+        }
+        return null;
+    }
+
+    /**
+     * Gets existing stock IDs from Database, returns null if caught exception.
+     * @return Stock Id set.
+     */
+    public CompanyRecord[] getExistingStocks() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+
+            DSLContext creator = this.getDBJooqCreate();
+            Result<CompanyRecord> records = creator.selectFrom(COMPANY).fetch();
+            return records.toArray(new CompanyRecord[0]);
         } catch (ClassNotFoundException e) {
             Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
         } catch (SQLException e) {
