@@ -1,28 +1,16 @@
 package dataEngineer.financeWebEngine;
 
-import com.joanzapata.utils.Strings;
 import dataEngineer.SharesQuote;
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import org.junit.Assert;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Created by zhuolil on 2/2/17.
@@ -51,17 +39,20 @@ public class XueqiuWebParser implements IWebParser{
     final static String PTE = "市盈率(静)/(动)";
     final static String PTB = "市净率(动)";
 
+    final static String DOUBLE_REGEX_STRING = "^\\d+(\\.\\d+)*$";
+    final static Pattern DOUBLE_PATTERN = Pattern.compile(DOUBLE_REGEX_STRING);
+
     public XueqiuWebParser() {
         // Does nothing
     }
     public SharesQuote queryCompanyStock(String symbol) throws IOException{
         Map<String, String> map = this.queryTableDetail(symbol);
         SharesQuote sharesQuote = new SharesQuote();
-        sharesQuote.currentPrice = Double.parseDouble(map.get(PRICE));
-        sharesQuote.closePrice = Double.parseDouble(map.get(CLOSE_PRICE));
-        sharesQuote.highestPrice = Double.parseDouble(map.get(HIGHEST_PRICE));
-        sharesQuote.lowestPrice = Double.parseDouble(map.get(LOWEST_PRICE));
-        sharesQuote.openPrice = Double.parseDouble(map.get(OPEN_PRICE));
+        sharesQuote.currentPrice = DOUBLE_PATTERN.matcher(map.get(PRICE)).find() ? Double.valueOf(map.get(PRICE)) : 0;
+        sharesQuote.closePrice = DOUBLE_PATTERN.matcher(map.get(CLOSE_PRICE)).find() ? Double.parseDouble(map.get(CLOSE_PRICE)) : 0;
+        sharesQuote.highestPrice = DOUBLE_PATTERN.matcher(map.get(HIGHEST_PRICE)).find() ? Double.parseDouble(map.get(HIGHEST_PRICE)) : 0;
+        sharesQuote.lowestPrice = DOUBLE_PATTERN.matcher(map.get(LOWEST_PRICE)).find() ? Double.parseDouble(map.get(LOWEST_PRICE)) : 0;
+        sharesQuote.openPrice = DOUBLE_PATTERN.matcher(map.get(OPEN_PRICE)).find() ? Double.parseDouble(map.get(OPEN_PRICE)) : 0;
 
         sharesQuote.dealVolum = map.get(DEAL_VOLUM);
         sharesQuote.dealValue = map.get(DEAL_VALUE);
@@ -69,8 +60,8 @@ public class XueqiuWebParser implements IWebParser{
         sharesQuote.tradingCap = map.get(TRADING_CAP);
 
         sharesQuote.oscillation = map.get(OSCILLATION);
-        sharesQuote.price2EarningRatio = Double.parseDouble(map.get(PTE));
-        sharesQuote.price2BookRatio = Double.parseDouble(map.get(PTB));
+        sharesQuote.price2EarningRatio = DOUBLE_PATTERN.matcher(map.get(PTE)).find() ? Double.parseDouble(map.get(PTE)) : 0;
+        sharesQuote.price2BookRatio = DOUBLE_PATTERN.matcher(map.get(PTB)).find() ? Double.parseDouble(map.get(PTB)) : 0;
 
         return sharesQuote;
     }
@@ -82,11 +73,15 @@ public class XueqiuWebParser implements IWebParser{
             // Parse html to get target element
             Document dom = Jsoup.connect(reportUrl).userAgent(XueqiuWebParser.USER_AGENT).get();
 
-            String currentPrice = dom.getElementsByAttribute("data-current").first().text();
+            Elements elements =dom.getElementsByAttribute("data-current");
+            String currentPrice = "0";
+            if (elements.size() == 1)
+                currentPrice = elements.first().text();
+
             if (currentPrice.startsWith("￥"))
                 currentPrice = currentPrice.substring(1);
 
-            Elements elements = dom.getElementsByClass("topTable");
+            elements = dom.getElementsByClass("topTable");
             if (elements.size()!=1){
                 throw new Exception("element size should equal to one.");
             }
@@ -112,7 +107,8 @@ public class XueqiuWebParser implements IWebParser{
         }
         catch (Exception exc)
         {
-
+            System.err.println("Error while processing url: " + reportUrl);
+            exc.printStackTrace();
         }
         return null;
     }

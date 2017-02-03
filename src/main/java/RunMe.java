@@ -17,7 +17,7 @@ import org.junit.Assert;
  * Created by zhuolil on 1/10/17.
  */
 public class RunMe {
-    final static int WEB_PARSER_SIZE = 5;
+    final static int WEB_PARSER_SIZE = 10;
 
     public static void main(String[] args) {
 
@@ -41,6 +41,12 @@ public class RunMe {
     public void run(boolean isIde) {
         try {
             System.out.println("HHa alive");
+
+            try {
+                new XueqiuWebParser().queryCompanyStock("sz002162");
+            }catch (Exception exc){
+
+            }
 
             StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
             SharesQuote[] companies = companyCollection.queryCompanyList(isIde);
@@ -69,14 +75,26 @@ public class RunMe {
             // Submit company query task
             for (SharesQuote companyObject : companies) {
                 executorService.submit(() -> {
+
+                    Runnable childTask = () -> {
+
+                        try {
+                            XueqiuWebParser webParser = new XueqiuWebParser();
+                            SharesQuote quote = webParser.queryCompanyStock(companyObject.stockid);
+                            quote.stockid = companyObject.stockid;
+                            quote.companyname = companyObject.companyname;
+                            quote.officialWebUrl = companyObject.officialWebUrl;
+                            sharesQuoteList.offer(quote);
+                        } catch (IOException exc) {
+                            exc.printStackTrace();
+                        }
+                    };
+
                     try {
-                        XueqiuWebParser webParser = new XueqiuWebParser();
-                        SharesQuote quote = webParser.queryCompanyStock(companyObject.stockid);
-                        quote.stockid = companyObject.stockid;
-                        quote.companyname = companyObject.companyname;
-                        quote.officialWebUrl = companyObject.officialWebUrl;
-                        sharesQuoteList.offer(quote);
-                    } catch (IOException exc) {
+                        Thread thread = new Thread(childTask);
+                        thread.start();
+                        thread.join(3 * 60 * 1000);
+                    }catch (InterruptedException exc){
                         exc.printStackTrace();
                     }
                 });
@@ -86,7 +104,7 @@ public class RunMe {
 
                 try {
                     // Poll wait for three minutes
-                    SharesQuote sharesQuote = sharesQuoteList.poll(5, TimeUnit.MINUTES);
+                    SharesQuote sharesQuote = sharesQuoteList.poll(2, TimeUnit.MINUTES);
                     if (sharesQuote == null)
                         continue;
                     databaseManager.insertOnDuplicateUpdate(sharesQuote);
@@ -120,8 +138,8 @@ public class RunMe {
      * 1: Sort company array so that those unsearched company moved to head of array and those
      * companies already in databaes moved to tail.
      *
-     * 2: Sort companies which is in database by lastUpdateDatetime order, e.g: the latest
-     * updated company move to tail.
+     * 2: Sort companies which is in database by lastUpdateDatetime order, e.g: the latest updated
+     * company move to tail.
      * 
      * @param existingCompanyRecords
      *            : company records in database.
@@ -176,7 +194,9 @@ public class RunMe {
 
         // Insertion sort the rest part of array based on the order of existingCompanyRecords
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
-            array[idx] = stociIdSharesQuoteMap.get(existingCompanyRecords[idx-nextSeenIdx-1].getStockid());
+            array[idx] =
+                    stociIdSharesQuoteMap.get(existingCompanyRecords[idx - nextSeenIdx - 1]
+                            .getStockid());
         }
     }
 
