@@ -14,39 +14,43 @@ import org.apache.commons.cli.*;
 import org.junit.Assert;
 
 /**
- * Created by zhuolil on 1/10/17.
+ * Entry point.
  */
 public class RunMe {
     final static int WEB_PARSER_SIZE = 10;
 
-    public static void main(String[] args) {
+    private CommandLine cmd;
+    private final static String DEBUG_OPTION = "d";
 
+    public static void main(String[] args) {
+        RunMe runMe = new RunMe(args);
+
+        if (runMe.cmd == null){
+            System.err.println("Failed on CommandLine initialization, system exit.");
+            System.exit(1);
+        }
+
+        runMe.run(runMe.cmd.hasOption(RunMe.DEBUG_OPTION));
+    }
+
+    private RunMe(String[] args){
         // create Options object
         Options options = new Options();
 
         // add t option
-        options.addOption("d", false, "Is running under IDE or not");
+        options.addOption(RunMe.DEBUG_OPTION, false, "Is running under IDE or not");
         CommandLineParser parser = new DefaultParser();
 
         try {
-            CommandLine cmd = parser.parse(options, args);
-
-            new RunMe().run(cmd.hasOption("d"));
+            this.cmd =  parser.parse(options, args);
         } catch (ParseException exc) {
             System.err.println("Arguments parse exception: " + exc.getMessage());
-            System.exit(1);
         }
     }
 
     public void run(boolean isIde) {
         try {
             System.out.println("HHa alive");
-
-            try {
-                new XueqiuWebParser().queryCompanyStock("sz002162");
-            }catch (Exception exc){
-
-            }
 
             StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
             SharesQuote[] companies = companyCollection.queryCompanyList(isIde);
