@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.cli.*;
 import org.junit.Assert;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * Entry point.
@@ -28,8 +30,24 @@ public class RunMe {
             System.err.println("Failed on CommandLine initialization, system exit.");
             System.exit(1);
         }
-
-        runMe.run(runMe.cmd.hasOption(RunMe.DEBUG_OPTION));
+        while(true) {
+            DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("Asia/Shanghai"));
+            try {
+                if (now.getDayOfWeek() > 5) {
+                    System.out.println(now.toString()+ ": Sleep 2 hours on weekend.");
+                    Thread.sleep(2 * 60 * 60 * 1000);
+                    continue;
+                }
+                if(now.getHourOfDay()<8 || now.getHourOfDay()>5){
+                    System.out.println(now.toString() + ": Sleep 5 minutes off hour.");
+                    Thread.sleep(5 * 60 * 1000);
+                    continue;
+                }
+            } catch (InterruptedException exc) {
+                System.out.println("Interrupted exception received, gonna launch querryAndUpdate...");
+            }
+            runMe.querryAndUpdate(runMe.cmd.hasOption(RunMe.DEBUG_OPTION));
+        }
     }
 
     /**
@@ -55,7 +73,7 @@ public class RunMe {
      * Assigns the task and collects the result.
      * @param isIde : Is in Intellij model or terminal model.
      */
-    public void run(boolean isIde) {
+    public void querryAndUpdate(boolean isIde) {
         try {
             System.out.println("HHa alive");
 
