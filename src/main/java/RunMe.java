@@ -2,14 +2,12 @@ import JooqORM.tables.records.CompanyRecord;
 import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import dataEngineer.financeWebEngine.XueqiuWebParser;
 import org.apache.commons.cli.*;
 import org.junit.Assert;
 
@@ -18,6 +16,7 @@ import org.junit.Assert;
  */
 public class RunMe {
     final static int WEB_PARSER_SIZE = 10;
+    final static long TASK_MAXIMUM_TIMEOUT = 3 * 60 * 1000;
 
     private CommandLine cmd;
     private final static String DEBUG_OPTION = "d";
@@ -25,7 +24,7 @@ public class RunMe {
     public static void main(String[] args) {
         RunMe runMe = new RunMe(args);
 
-        if (runMe.cmd == null){
+        if (runMe.cmd == null) {
             System.err.println("Failed on CommandLine initialization, system exit.");
             System.exit(1);
         }
@@ -33,7 +32,11 @@ public class RunMe {
         runMe.run(runMe.cmd.hasOption(RunMe.DEBUG_OPTION));
     }
 
-    private RunMe(String[] args){
+    /**
+     * Constructor.
+     * @param args
+     */
+    private RunMe(String[] args) {
         // create Options object
         Options options = new Options();
 
@@ -42,12 +45,16 @@ public class RunMe {
         CommandLineParser parser = new DefaultParser();
 
         try {
-            this.cmd =  parser.parse(options, args);
+            this.cmd = parser.parse(options, args);
         } catch (ParseException exc) {
             System.err.println("Arguments parse exception: " + exc.getMessage());
         }
     }
 
+    /**
+     * Assigns the task and collects the result.
+     * @param isIde : Is in Intellij model or terminal model.
+     */
     public void run(boolean isIde) {
         try {
             System.out.println("HHa alive");
@@ -66,68 +73,63 @@ public class RunMe {
             System.out.println("Company size: " + companies.length);
             System.out.println("Querying company stock from webpage....");
 
-            ExecutorService executorService = Executors.newFixedThreadPool(WEB_PARSER_SIZE);
-
-            LinkedBlockingQueue<SharesQuote> sharesQuoteList =
-                    new LinkedBlockingQueue<>(companies.length);
+            ExecutorService executorService = Executors.newFixedThreadPool(RunMe.WEB_PARSER_SIZE);
 
             System.out.println(LocalDateTime.now().toString() + " "
                     + (companies.length - existingCompanyRecords.length)
                     + " Companies remain to be added to database.");
             this.sortArray(existingCompanyRecords, companies);
 
+            List<RunmeFuture> futureList = new LinkedList<>();
+
             // Submit company query task
             for (SharesQuote companyObject : companies) {
-                executorService.submit(() -> {
-
-                    Runnable childTask = () -> {
-
-                        try {
-                            XueqiuWebParser webParser = new XueqiuWebParser();
-                            SharesQuote quote = webParser.queryCompanyStock(companyObject.stockid);
-                            quote.stockid = companyObject.stockid;
-                            quote.companyname = companyObject.companyname;
-                            quote.officialWebUrl = companyObject.officialWebUrl;
-                            sharesQuoteList.offer(quote);
-                        } catch (IOException exc) {
-                            exc.printStackTrace();
-                        }
-                    };
-
-                    try {
-                        Thread thread = new Thread(childTask);
-                        thread.start();
-                        thread.join(3 * 60 * 1000);
-                    }catch (InterruptedException exc){
-                        exc.printStackTrace();
-                    }
-                });
+                RunmeFuture runmeFuture = new RunmeFuture(executorService::submit, companyObject);
+                futureList.add(runmeFuture);
             }
 
-            while (!executorService.isTerminated()) {
+            while (!executorService.isTerminated() && !futureList.isEmpty()) {
+
+                // Filter out the tasks that have been consumed
+                futureList =
+                        futureList
+                                .stream()
+                                .filter(future -> !future.isResultConsumed)
+                                .collect(Collectors.toList());
+
+                // Remove timeout task
+                futureList =
+                        futureList
+                                .stream()
+                                .filter(future -> !(future.startTimeMillis.isPresent() && (future.startTimeMillis.get()
+                                        + RunMe.TASK_MAXIMUM_TIMEOUT < System.currentTimeMillis()) && !future.result.isPresent()))
+                                .collect(Collectors.toList());
+
+                System.out.println("Remain future list size: " + futureList.size());
+
+                for( RunmeFuture runmeFuture : futureList) {
+                    if (!runmeFuture.result.isPresent())
+                        continue;
+                    SharesQuote sharesQuote = runmeFuture.result.get();
+                    runmeFuture.isResultConsumed = true;
+                    try {
+                        databaseManager.insertOnDuplicateUpdate(sharesQuote);
+                        System.out.println(LocalDateTime.now().toString()
+                                + ": Succeed on update company: " + sharesQuote.companyname
+                                + ";  StockID: " + sharesQuote.stockid);
+                    } catch (SQLException exc) {
+                        exc.printStackTrace();
+                        System.exit(1);
+                    } catch (ClassNotFoundException exc) {
+                        exc.printStackTrace();
+                        System.exit(1);
+                    }
+                }
 
                 try {
-                    // Poll wait for three minutes
-                    SharesQuote sharesQuote = sharesQuoteList.poll(2, TimeUnit.MINUTES);
-                    if (sharesQuote == null)
-                        continue;
-                    databaseManager.insertOnDuplicateUpdate(sharesQuote);
-                    System.out.println(LocalDateTime.now().toString()
-                            + ": Succeed on update company: " + sharesQuote.companyname
-                            + ";  StockID: " + sharesQuote.stockid);
+                    Thread.sleep(1000);
+                }catch (Exception exc){
 
-                } catch (InterruptedException exc) {
-                    exc.printStackTrace();
-
-                    // Break while loop if time out and shareQuoteList is zero
-                    if (sharesQuoteList.size() == 0)
-                        break;
-                } catch (SQLException exc) {
-                    exc.printStackTrace();
-                    System.exit(1);
-                } catch (ClassNotFoundException exc) {
-                    exc.printStackTrace();
-                    System.exit(1);
                 }
             }
 
