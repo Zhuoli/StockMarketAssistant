@@ -47,6 +47,7 @@ public class RunMe {
                 System.out.println("Interrupted exception received, gonna launch querryAndUpdate...");
             }
             runMe.querryAndUpdate(runMe.cmd.hasOption(RunMe.DEBUG_OPTION));
+            System.out.println(LocalDateTime.now().toString() + " One loop Job done.");
         }
     }
 
@@ -150,9 +151,6 @@ public class RunMe {
 
                 }
             }
-
-            System.out.println(LocalDateTime.now().toString() + "  Job done.");
-            System.exit(0);
         } finally {
             DatabaseManager.close();
         }
