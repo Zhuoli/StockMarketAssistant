@@ -38,7 +38,7 @@ public class RunMe {
                     Thread.sleep(2 * 60 * 60 * 1000);
                     continue;
                 }
-                if(now.getHourOfDay()<8 || now.getHourOfDay()>5){
+                if(now.getHourOfDay()<8 || now.getHourOfDay()>17){
                     System.out.println(now.toString() + ": Sleep 5 minutes off hour.");
                     Thread.sleep(5 * 60 * 1000);
                     continue;
