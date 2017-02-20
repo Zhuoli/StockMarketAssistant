@@ -3,6 +3,7 @@ import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
@@ -125,6 +126,8 @@ public class RunMe {
                                 .collect(Collectors.toList());
 
                 System.out.println("Remain future list size: " + futureList.size());
+                DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("Asia/Shanghai"));
+
 
                 for( RunmeFuture runmeFuture : futureList) {
                     if (!runmeFuture.result.isPresent())
@@ -133,7 +136,7 @@ public class RunMe {
                     runmeFuture.isResultConsumed = true;
                     try {
                         databaseManager.insertOnDuplicateUpdate(sharesQuote);
-                        System.out.println(LocalDateTime.now().toString()
+                        System.out.println(now.toString()
                                 + ": Succeed on update company: " + sharesQuote.companyname
                                 + ";  StockID: " + sharesQuote.stockid);
                     } catch (SQLException exc) {
