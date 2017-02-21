@@ -193,8 +193,8 @@ public class DatabaseManager {
                                             COMPANY.LAST_UPDATE_DATE_TIME, COMPANY.PBR,
                                             COMPANY.PER, COMPANY.CURRENTPRICE)
                                     .values(companyObject.stockid, companyObject.companyname,
-                                            Timestamp.valueOf(LocalDateTime.now()),
-                                            Timestamp.valueOf(LocalDateTime.now()),
+                                            new Timestamp(System.currentTimeMillis()),
+                                            new Timestamp(System.currentTimeMillis()),
                                             companyObject.price2BookRatio,
                                             companyObject.price2EarningRatio,
                                             companyObject.currentPrice)
@@ -252,10 +252,10 @@ public class DatabaseManager {
                                             COMPANY.TURNOVERRATE)
                                     .values(companyObject.stockid, companyObject.companyname,
                                             companyObject.currentPrice,
-                                            Timestamp.valueOf(LocalDateTime.now()),
+                                            new Timestamp(System.currentTimeMillis()),
                                             companyObject.highestPrice, companyObject.lowestPrice,
                                             companyObject.closePrice,
-                                            Timestamp.valueOf(LocalDateTime.now()),
+                                            new Timestamp(System.currentTimeMillis()),
                                             companyObject.price2BookRatio,
                                             companyObject.price2EarningRatio,
                                             companyObject.tradingCap, companyObject.marketCap,
@@ -270,9 +270,9 @@ public class DatabaseManager {
                                     .set(COMPANY.LOWEST_PRICE, companyObject.lowestPrice)
                                     .set(COMPANY.CLOSE_PRICE, companyObject.closePrice)
                                     .set(COMPANY.CURRENTPRICETIMESTAMP,
-                                            Timestamp.valueOf(LocalDateTime.now()))
+                                            new Timestamp(System.currentTimeMillis()))
                                     .set(COMPANY.LAST_UPDATE_DATE_TIME,
-                                            Timestamp.valueOf(LocalDateTime.now()))
+                                            new Timestamp(System.currentTimeMillis()))
                                     .set(COMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
                                     .set(COMPANY.MARKETCAP, companyObject.marketCap)
                                     .set(COMPANY.TRADINGVALUE, companyObject.dealValue)
