@@ -3,7 +3,6 @@ import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
@@ -22,7 +21,8 @@ public class RunMe {
     final static long TASK_MAXIMUM_TIMEOUT = 3 * 60 * 1000;
 
     private CommandLine cmd;
-    private final static String DEBUG_OPTION = "d";
+    private final static String IS_UNDER_INTELLIJ = "i";
+    private final static String DEBUG = "d";
 
     public static void main(String[] args) {
         RunMe runMe = new RunMe(args);
@@ -31,6 +31,12 @@ public class RunMe {
             System.err.println("Failed on CommandLine initialization, system exit.");
             System.exit(1);
         }
+
+        // Run one round of query & update despite the current time
+        if (runMe.cmd.hasOption(RunMe.DEBUG)){
+            runMe.querryAndUpdate(runMe.cmd.hasOption(RunMe.IS_UNDER_INTELLIJ));
+        }
+
         while(true) {
             DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("Asia/Shanghai"));
             try {
@@ -47,7 +53,7 @@ public class RunMe {
             } catch (InterruptedException exc) {
                 System.out.println("Interrupted exception received, gonna launch querryAndUpdate...");
             }
-            runMe.querryAndUpdate(runMe.cmd.hasOption(RunMe.DEBUG_OPTION));
+            runMe.querryAndUpdate(runMe.cmd.hasOption(RunMe.IS_UNDER_INTELLIJ));
             System.out.println(LocalDateTime.now().toString() + " One loop Job done.");
         }
     }
@@ -61,7 +67,8 @@ public class RunMe {
         Options options = new Options();
 
         // add t option
-        options.addOption(RunMe.DEBUG_OPTION, false, "Is running under IDE or not");
+        options.addOption(RunMe.IS_UNDER_INTELLIJ, false, "Is running under IDE or not");
+        options.addOption(RunMe.DEBUG, false, "Is running under Debug model or not");
         CommandLineParser parser = new DefaultParser();
 
         try {
@@ -127,7 +134,6 @@ public class RunMe {
 
                 System.out.println("Remain future list size: " + futureList.size());
                 DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("Asia/Shanghai"));
-
 
                 for( RunmeFuture runmeFuture : futureList) {
                     if (!runmeFuture.result.isPresent())
