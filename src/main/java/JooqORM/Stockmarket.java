@@ -5,6 +5,7 @@ package JooqORM;
 
 
 import JooqORM.tables.Chinesemarketcompany;
+import JooqORM.tables.Usmarketcompany;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Stockmarket extends SchemaImpl {
 
-    private static final long serialVersionUID = 1824223524;
+    private static final long serialVersionUID = 394317073;
 
     /**
      * The reference instance of <code>StockMarket</code>
@@ -41,6 +42,11 @@ public class Stockmarket extends SchemaImpl {
      * The table <code>StockMarket.ChineseMarketCompany</code>.
      */
     public final Chinesemarketcompany CHINESEMARKETCOMPANY = JooqORM.tables.Chinesemarketcompany.CHINESEMARKETCOMPANY;
+
+    /**
+     * The table <code>StockMarket.USMarketCompany</code>.
+     */
+    public final Usmarketcompany USMARKETCOMPANY = JooqORM.tables.Usmarketcompany.USMARKETCOMPANY;
 
     /**
      * No further instances allowed
@@ -67,6 +73,7 @@ public class Stockmarket extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
-            Chinesemarketcompany.CHINESEMARKETCOMPANY);
+            Chinesemarketcompany.CHINESEMARKETCOMPANY,
+            Usmarketcompany.USMARKETCOMPANY);
     }
 }

@@ -5,7 +5,9 @@ package JooqORM;
 
 
 import JooqORM.tables.Chinesemarketcompany;
+import JooqORM.tables.Usmarketcompany;
 import JooqORM.tables.records.ChinesemarketcompanyRecord;
+import JooqORM.tables.records.UsmarketcompanyRecord;
 
 import javax.annotation.Generated;
 
@@ -37,6 +39,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<ChinesemarketcompanyRecord> KEY_CHINESEMARKETCOMPANY_PRIMARY = UniqueKeys0.KEY_CHINESEMARKETCOMPANY_PRIMARY;
+    public static final UniqueKey<UsmarketcompanyRecord> KEY_USMARKETCOMPANY_PRIMARY = UniqueKeys0.KEY_USMARKETCOMPANY_PRIMARY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -49,5 +52,6 @@ public class Keys {
 
     private static class UniqueKeys0 extends AbstractKeys {
         public static final UniqueKey<ChinesemarketcompanyRecord> KEY_CHINESEMARKETCOMPANY_PRIMARY = createUniqueKey(Chinesemarketcompany.CHINESEMARKETCOMPANY, "KEY_ChineseMarketCompany_PRIMARY", Chinesemarketcompany.CHINESEMARKETCOMPANY.STOCKID);
+        public static final UniqueKey<UsmarketcompanyRecord> KEY_USMARKETCOMPANY_PRIMARY = createUniqueKey(Usmarketcompany.USMARKETCOMPANY, "KEY_USMarketCompany_PRIMARY", Usmarketcompany.USMARKETCOMPANY.STOCKID);
     }
 }
