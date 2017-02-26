@@ -23,7 +23,25 @@ import java.util.stream.Collectors;
  */
 public class ChineseMarketMaster {
 
-    public void run(CommandLine cmd) {
+    CommandLine cmd;
+    SharesQuote[] companies;
+    boolean isInited = false;
+    public ChineseMarketMaster(CommandLine cmd){
+        this.cmd = cmd;
+    }
+
+    public void init(){
+        Assert.assertNotNull(cmd);
+        StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
+        this.companies = companyCollection.queryCompanyListChinese(cmd.hasOption(MarketConstant.IS_UNDER_INTELLIJ));
+        this.isInited = true;
+    }
+
+    public void run() {
+
+        if(!this.isInited)
+            this.init();
+
         while (true) {
             DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("Asia/Shanghai"));
             try {
@@ -40,7 +58,7 @@ public class ChineseMarketMaster {
             } catch (InterruptedException exc) {
                 System.out.println("Interrupted exception received, gonna launch querryAndUpdate...");
             }
-            this.querryAndUpdate(cmd.hasOption(MarketConstant.IS_UNDER_INTELLIJ));
+            this.querryAndUpdate();
             System.out.println(LocalDateTime.now().toString() + " One loop Job done.");
         }
     }
@@ -49,14 +67,11 @@ public class ChineseMarketMaster {
     /**
      * Assigns the task and collects the result.
      *
-     * @param isIde : Is in Intellij model or terminal model.
      */
-    public void querryAndUpdate(boolean isIde) {
+    public void querryAndUpdate() {
         try {
             System.out.println("HHa alive");
 
-            StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
-            SharesQuote[] companies = companyCollection.queryCompanyList(isIde);
 
             DatabaseManager databaseManager = this.initializeDataManager();
             if (databaseManager == null) {

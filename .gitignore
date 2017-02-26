@@ -5,3 +5,8 @@
 *.log
 .target/
 *.xml
+target/classes/JooqORM/
+target/classes/SHAstockList.csv
+target/classes/SZAstockList.csv
+target/classes/dataEngineer/
+target/generated-sources/

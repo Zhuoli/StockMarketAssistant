@@ -1,4 +1,5 @@
 import MarketChinese.ChineseMarketMaster;
+import MarketUS.USMarketMaster;
 import org.apache.commons.cli.*;
 import util.MarketConstant;
 
@@ -16,14 +17,18 @@ public class RunMe {
             System.exit(1);
         }
 
+        ChineseMarketMaster chineseMarketMaster = new ChineseMarketMaster(runMe.cmd);
+        USMarketMaster usMarketMaster = new USMarketMaster(runMe.cmd);
+
         // Run one round of query & update despite the current time
         if (runMe.cmd.hasOption(MarketConstant.DEBUG)) {
-            ChineseMarketMaster chineseMarketMaster = new ChineseMarketMaster();
-            chineseMarketMaster.querryAndUpdate(runMe.cmd
-                    .hasOption(MarketConstant.IS_UNDER_INTELLIJ));
+            usMarketMaster.init();
+//            usMarketMaster.q
+//            chineseMarketMaster.init();
+//            chineseMarketMaster.querryAndUpdate();
         }
 
-        new ChineseMarketMaster().run(runMe.cmd);
+//        chineseMarketMaster.run();
     }
 
     /**

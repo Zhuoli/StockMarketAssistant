@@ -7,14 +7,13 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import util.MarketConstant;
 
 /**
  * Created by zhuolil on 1/16/17.
  */
 public final class StockCompanyCollection {
 
-    private static final String SZ_STOCK_LIST_PATH = "SZAstockList.csv";
-    private static final String SH_STOCK_LIST_PATH = "SHAstockList.csv";
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
     private  static StockCompanyCollection thisInstance = null;
@@ -31,16 +30,60 @@ public final class StockCompanyCollection {
         return thisInstance;
     }
 
-    public SharesQuote[] queryCompanyList(boolean isDebug){
+    public SharesQuote[] queryCompanyListChinese(boolean isDebug){
         String msg = isDebug ? "Application is run in IDE" : "Application is run in jar";
         System.out.println(msg);
 
         if (companyObjectCollection == null){
             companyObjectCollection = new LinkedList<>();
-            companyObjectCollection.addAll(this.readSZAStockCompanyList(isDebug? "./src/main/resources/" + SZ_STOCK_LIST_PATH : "./" + SZ_STOCK_LIST_PATH));
-            companyObjectCollection.addAll(this.readSHAStockCompanyList(isDebug? "./src/main/resources/" + SH_STOCK_LIST_PATH : "./" + SH_STOCK_LIST_PATH));
+            companyObjectCollection.addAll(this.readSZAStockCompanyList(isDebug? "./src/main/resources/" + MarketConstant.SZ_STOCK_LIST_PATH : "./" + MarketConstant.SZ_STOCK_LIST_PATH));
+            companyObjectCollection.addAll(this.readSHAStockCompanyList(isDebug? "./src/main/resources/" + MarketConstant.SH_STOCK_LIST_PATH : "./" + MarketConstant.SH_STOCK_LIST_PATH));
         }
         return companyObjectCollection.toArray(new SharesQuote[0]);
+    }
+
+    public SharesQuote[] queryCompanyListUS(boolean isDebug){
+        String msg = isDebug ? "Application is run in IDE" : "Application is run in jar";
+        System.out.println(msg);
+        String path = isDebug? "./src/main/resources/" + MarketConstant.NASDAQ_STOCK_LIST_PATH : "./" + MarketConstant.NASDAQ_STOCK_LIST_PATH;
+        return this.readNasdaqCompanyList(path).toArray(new SharesQuote[0]);
+    }
+
+    /**
+     * Reads Nasdaq company list.
+     * @param csvFile
+     * @return list of shares quote.
+     */
+    private List<SharesQuote> readNasdaqCompanyList(String csvFile){
+        System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
+        Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
+        List<SharesQuote> companyObjectList = new LinkedList<>();
+        try(Scanner scanner = new Scanner(new File(csvFile)))
+        {
+            if (scanner.hasNext()) {
+                List<String> headers = parseLine(scanner.nextLine());
+                Assert.assertNotNull(headers);
+                Assert.assertTrue(headers.size()>9);
+                Assert.assertEquals("Symbol", headers.get(0));
+                Assert.assertEquals("Name", headers.get(1));
+                Assert.assertEquals("IPOyear", headers.get(5));
+            }
+
+            // Read row
+            while (scanner.hasNext()) {
+                List<String> line = parseLine(scanner.nextLine());
+                Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 10, line.size());
+                SharesQuote companyObject = new SharesQuote();
+//                companyObject.code = "sh" + line.get(0).trim();
+                companyObject.stockid = "sh" + line.get(0).trim();
+                companyObject.companyname = line.get(1).trim();
+                companyObjectList.add(companyObject);
+            }
+
+        }catch (IOException exc){
+            System.err.println("Exception on idx: " + companyObjectList.size() + "\n" + exc.getMessage());
+        }
+        return companyObjectList;
     }
 
     /**
