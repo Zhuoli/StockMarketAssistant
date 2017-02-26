@@ -1,6 +1,6 @@
 package MarketChinese;
 
-import JooqORM.tables.records.CompanyRecord;
+import JooqORM.tables.records.ChinesemarketcompanyRecord;
 import dataEngineer.DatabaseManager;
 import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
@@ -79,7 +79,7 @@ public class ChineseMarketMaster {
                 System.exit(1);
             }
 
-            CompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocks();
+            ChinesemarketcompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocks();
 
             System.out.println("Company size: " + companies.length);
             System.out.println("Querying company stock from webpage....");
@@ -131,10 +131,14 @@ public class ChineseMarketMaster {
                                 + ";  StockID: " + sharesQuote.stockid);
                     } catch (SQLException exc) {
                         exc.printStackTrace();
+                        System.out.println(sharesQuote);
                         System.exit(1);
                     } catch (ClassNotFoundException exc) {
+                        System.out.println(sharesQuote);
                         exc.printStackTrace();
                         System.exit(1);
+                    }catch (Exception exc){
+                        System.out.println(sharesQuote);
                     }
                 }
 
@@ -177,7 +181,7 @@ public class ChineseMarketMaster {
      * @param array
      *            : All the companies to be sorted.
      */
-    private void sortArray(CompanyRecord[] existingCompanyRecords, SharesQuote[] array) {
+    private void sortArray(ChinesemarketcompanyRecord[] existingCompanyRecords, SharesQuote[] array) {
 
         if (existingCompanyRecords == null || array == null)
             return;
@@ -205,9 +209,9 @@ public class ChineseMarketMaster {
 
         // 2: Sort companies which is in database by lastUpdateDatetime order, e.g: the latest
         // updated company move to tail.
-        HashMap<String, CompanyRecord> stockIdCompanyRecordMap = new HashMap<>();
+        HashMap<String, ChinesemarketcompanyRecord> stockIdCompanyRecordMap = new HashMap<>();
         HashMap<String, SharesQuote> stociIdSharesQuoteMap = new HashMap<>();
-        for (CompanyRecord companyRecord : existingCompanyRecords) {
+        for (ChinesemarketcompanyRecord companyRecord : existingCompanyRecords) {
             stockIdCompanyRecordMap.put(companyRecord.getStockid(), companyRecord);
         }
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
@@ -218,7 +222,7 @@ public class ChineseMarketMaster {
         Assert.assertEquals(stociIdSharesQuoteMap.size(), stockIdCompanyRecordMap.size());
 
         // Sort existingCompanyRecords
-        Arrays.sort(existingCompanyRecords, (CompanyRecord a, CompanyRecord b) -> a
+        Arrays.sort(existingCompanyRecords, (ChinesemarketcompanyRecord a, ChinesemarketcompanyRecord b) -> a
                 .getLastUpdateDateTime()
                 .toLocalDateTime()
                 .compareTo(b.getLastUpdateDateTime().toLocalDateTime()));

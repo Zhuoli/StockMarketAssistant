@@ -4,8 +4,8 @@
 package JooqORM;
 
 
-import JooqORM.tables.Company;
-import JooqORM.tables.records.CompanyRecord;
+import JooqORM.tables.Chinesemarketcompany;
+import JooqORM.tables.records.ChinesemarketcompanyRecord;
 
 import javax.annotation.Generated;
 
@@ -14,7 +14,7 @@ import org.jooq.impl.AbstractKeys;
 
 
 /**
- * A class modelling foreign key relationships between tables of the <code>ChineseStock</code> 
+ * A class modelling foreign key relationships between tables of the <code>StockMarket</code> 
  * schema
  */
 @Generated(
@@ -36,7 +36,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<CompanyRecord> KEY_COMPANY_PRIMARY = UniqueKeys0.KEY_COMPANY_PRIMARY;
+    public static final UniqueKey<ChinesemarketcompanyRecord> KEY_CHINESEMARKETCOMPANY_PRIMARY = UniqueKeys0.KEY_CHINESEMARKETCOMPANY_PRIMARY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -48,6 +48,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 extends AbstractKeys {
-        public static final UniqueKey<CompanyRecord> KEY_COMPANY_PRIMARY = createUniqueKey(Company.COMPANY, "KEY_company_PRIMARY", Company.COMPANY.STOCKID);
+        public static final UniqueKey<ChinesemarketcompanyRecord> KEY_CHINESEMARKETCOMPANY_PRIMARY = createUniqueKey(Chinesemarketcompany.CHINESEMARKETCOMPANY, "KEY_ChineseMarketCompany_PRIMARY", Chinesemarketcompany.CHINESEMARKETCOMPANY.STOCKID);
     }
 }

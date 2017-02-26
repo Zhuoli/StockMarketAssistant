@@ -1,21 +1,23 @@
-CREATE TABLE `ChineseStock`.`Company`
+CREATE TABLE `StockMarket`.`ChineseMarketCompany`
 (
    stockid                 VARCHAR(20) NOT NULL COMMENT '股票ID',
    companyname             VARCHAR(20) NOT NULL COMMENT '公司名称',
-   currentprice            FLOAT(4, 2) COMMENT 'Current stock price',
+   currentprice            Double(4, 2) COMMENT 'Current stock price',
    currentpricetimestamp   DATETIME NOT NULL,
-   openprice               FLOAT(4, 2) COMMENT '开盘价',
-   closeprice              FLOAT(4, 2) COMMENT '昨日收盘价',
-   marketcap               FLOAT(4, 2) COMMENT '总市值',
-   capitalizationvalue     FLOAT(4, 2) COMMENT '流通市值',
-   tradingvolume           FLOAT(4, 2) COMMENT '成交量',
-   tradingvalue            FLOAT(4, 2) COMMENT '成交额',
-   oscillation             FLOAT(4, 2) COMMENT '股票振幅',
-   turnoverrate            FLOAT(4, 2) DEFAULT 0.0 COMMENT '换手率',
-   `PBR`                   INT(5)
+   openprice               Double(4, 2) COMMENT '开盘价',
+   closeprice              Double(4, 2) COMMENT '昨日收盘价',
+   highest_price			  Double(4,2)  COMMENT '最高价',
+   lowest_price			  Double(4,2)  COMMENT '最低价',
+   marketcap               VARCHAR(20) COMMENT '总市值',
+   capitalizationvalue     VARCHAR(20) COMMENT '流通市值',
+   tradingvolume           VARCHAR(20) COMMENT '成交量',
+   tradingvalue            VARCHAR(20) COMMENT '成交额',
+   oscillation             VARCHAR(20) COMMENT '股票振幅',
+   turnoverrate            VARCHAR(20) COMMENT '换手率',
+   `PBR`                   DOUBLE(4,2)
                               DEFAULT 0
                               COMMENT '市净率 Price-to-book ratio',
-   `PER`                   INT(5) DEFAULT 0 COMMENT '市盈率',
-   lastUpdateDateTime   DATETIME NOT NULL COMMENT '最后一次更新时间',
+   `PER`                   DOUBLE(4,2) DEFAULT 0 COMMENT '市盈率',
+   last_update_date_time   DATETIME NOT NULL COMMENT '最后一次更新时间',
    PRIMARY KEY(stockid)
    )

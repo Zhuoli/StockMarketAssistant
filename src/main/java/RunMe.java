@@ -22,10 +22,9 @@ public class RunMe {
 
         // Run one round of query & update despite the current time
         if (runMe.cmd.hasOption(MarketConstant.DEBUG)) {
-            usMarketMaster.init();
-//            usMarketMaster.q
-//            chineseMarketMaster.init();
-//            chineseMarketMaster.querryAndUpdate();
+//            usMarketMaster.init();
+            chineseMarketMaster.init();
+            chineseMarketMaster.querryAndUpdate();
         }
 
 //        chineseMarketMaster.run();

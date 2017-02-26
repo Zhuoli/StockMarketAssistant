@@ -4,13 +4,13 @@
 package JooqORM;
 
 
-import JooqORM.tables.Company;
+import JooqORM.tables.Chinesemarketcompany;
 
 import javax.annotation.Generated;
 
 
 /**
- * Convenience access to all tables in ChineseStock
+ * Convenience access to all tables in StockMarket
  */
 @Generated(
     value = {
@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 public class Tables {
 
     /**
-     * The table <code>ChineseStock.company</code>.
+     * The table <code>StockMarket.ChineseMarketCompany</code>.
      */
-    public static final Company COMPANY = JooqORM.tables.Company.COMPANY;
+    public static final Chinesemarketcompany CHINESEMARKETCOMPANY = JooqORM.tables.Chinesemarketcompany.CHINESEMARKETCOMPANY;
 }

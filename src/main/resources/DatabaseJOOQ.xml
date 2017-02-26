@@ -3,9 +3,9 @@
     <!-- Configure the database connection here -->
     <jdbc>
         <driver>com.mysql.jdbc.Driver</driver>
-        <url>jdbc:mysql://earningmanagement.cqxahokpf4dx.us-west-2.rds.amazonaws.com:3306/ChineseStock</url>
         <user></user>
         <password></password>
+        <url>jdbc:mysql://earningmanagement.cqxahokpf4dx.us-west-2.rds.amazonaws.com:3306/StockMarket</url>
     </jdbc>
 
     <generator>
@@ -23,7 +23,7 @@
 
             <!-- The database schema (or in the absence of schema support, in your RDBMS this
                  can be the owner, user, database name) to be generated -->
-            <inputSchema>ChineseStock</inputSchema>
+            <inputSchema>StockMarket</inputSchema>
 
             <!-- All elements that are generated from your schema
                  (A Java regular expression. Use the pipe to separate several expressions)
