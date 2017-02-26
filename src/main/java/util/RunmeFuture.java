@@ -1,3 +1,5 @@
+package util;
+
 import dataEngineer.SharesQuote;
 import dataEngineer.financeWebEngine.XueqiuWebParser;
 

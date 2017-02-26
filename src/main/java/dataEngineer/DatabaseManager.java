@@ -1,5 +1,6 @@
+package dataEngineer;
+
 import JooqORM.tables.records.CompanyRecord;
-import dataEngineer.SharesQuote;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.junit.Assert;
