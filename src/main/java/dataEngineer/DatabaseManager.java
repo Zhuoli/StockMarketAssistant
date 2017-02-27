@@ -1,11 +1,16 @@
 package dataEngineer;
 
+import JooqORM.tables.Chinesemarketcompany;
+import JooqORM.tables.Usmarketcompany;
 import JooqORM.tables.records.ChinesemarketcompanyRecord;
+import JooqORM.tables.records.UsmarketcompanyRecord;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.jooq.impl.TableImpl;
 import org.junit.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import util.MarketConstant;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,6 +29,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static JooqORM.Tables.CHINESEMARKETCOMPANY;
+import static JooqORM.Tables.USMARKETCOMPANY;
 
 /**
  * Interacts with AWS Database through JOOQ package.
@@ -52,6 +58,21 @@ public class DatabaseManager {
     private DatabaseManager() {
         // Does nothing
     }
+
+    /**
+     * Reads credential and authenticate SQL connection.
+     *
+     * @return
+     */
+    public static DatabaseManager initializeDataManager() {
+        try {
+            return DatabaseManager.GetDatabaseManagerInstance(MarketConstant.RESOURCE_CONFIG).Authenticate();
+        } catch (SQLException exc) {
+            exc.printStackTrace();
+            return null;
+        }
+    }
+
 
     /**
      * Gets Database Manager instance.
@@ -220,8 +241,13 @@ public class DatabaseManager {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public void insertOnDuplicateUpdate(SharesQuote... companies) throws SQLException,
+    public void insertOnDuplicateUpdate(TableImpl table, SharesQuote... companies) throws SQLException,
             ClassNotFoundException {
+
+        // Data validation
+        Assert.assertNotNull(table);
+        Assert.assertNotNull(companies);
+
         Iterator<SharesQuote> companyObjectIterator = Arrays.asList(companies).iterator();
 
         try {
@@ -231,61 +257,130 @@ public class DatabaseManager {
             throw e;
         }
 
-        DSLContext creator = this.getDBJooqCreate();
-
         // Get next batch of company
         SharesQuote[] companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
 
         // Batch insert companies
         while (companyObjects != null && companyObjects.length > 0) {
-
-            // Convert companyobject array to JOOQ query array
-            List<InsertOnDuplicateSetMoreStep<ChinesemarketcompanyRecord>> list =
-                    Arrays.stream(companyObjects)
-                            .map(companyObject -> creator
-                                    .insertInto(CHINESEMARKETCOMPANY, CHINESEMARKETCOMPANY.STOCKID, CHINESEMARKETCOMPANY.COMPANYNAME,
-                                            CHINESEMARKETCOMPANY.CURRENTPRICE, CHINESEMARKETCOMPANY.CURRENTPRICETIMESTAMP,
-                                            CHINESEMARKETCOMPANY.HIGHEST_PRICE, CHINESEMARKETCOMPANY.LOWEST_PRICE,
-                                            CHINESEMARKETCOMPANY.CLOSEPRICE, CHINESEMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
-                                            CHINESEMARKETCOMPANY.PBR, CHINESEMARKETCOMPANY.PER, CHINESEMARKETCOMPANY.CAPITALIZATIONVALUE,
-                                            CHINESEMARKETCOMPANY.MARKETCAP, CHINESEMARKETCOMPANY.TRADINGVOLUME,
-                                            CHINESEMARKETCOMPANY.TRADINGVALUE, CHINESEMARKETCOMPANY.OSCILLATION,
-                                            CHINESEMARKETCOMPANY.TURNOVERRATE)
-                                    .values(companyObject.stockid, companyObject.companyname,
-                                            companyObject.currentPrice,
-                                            new Timestamp(System.currentTimeMillis()),
-                                            companyObject.highestPrice, companyObject.lowestPrice,
-                                            companyObject.closePrice,
-                                            new Timestamp(System.currentTimeMillis()),
-                                            companyObject.price2BookRatio,
-                                            companyObject.price2EarningRatio,
-                                            companyObject.tradingCap, companyObject.marketCap,
-                                            companyObject.dealVolum, companyObject.dealValue,
-                                            companyObject.oscillation, companyObject.exchangeRatio)
-                                    .onDuplicateKeyUpdate()
-                                    .set(CHINESEMARKETCOMPANY.CURRENTPRICE, companyObject.currentPrice)
-                                    .set(CHINESEMARKETCOMPANY.PBR, companyObject.price2BookRatio)
-                                    .set(CHINESEMARKETCOMPANY.PER, companyObject.price2EarningRatio)
-                                    .set(CHINESEMARKETCOMPANY.OPENPRICE, companyObject.openPrice)
-                                    .set(CHINESEMARKETCOMPANY.HIGHEST_PRICE, companyObject.highestPrice)
-                                    .set(CHINESEMARKETCOMPANY.LOWEST_PRICE, companyObject.lowestPrice)
-                                    .set(CHINESEMARKETCOMPANY.CLOSEPRICE, companyObject.closePrice)
-                                    .set(CHINESEMARKETCOMPANY.CURRENTPRICETIMESTAMP,
-                                            new Timestamp(System.currentTimeMillis()))
-                                    .set(CHINESEMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
-                                            new Timestamp(System.currentTimeMillis()))
-                                    .set(CHINESEMARKETCOMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
-                                    .set(CHINESEMARKETCOMPANY.MARKETCAP, companyObject.marketCap)
-                                    .set(CHINESEMARKETCOMPANY.TRADINGVALUE, companyObject.dealValue)
-                                    .set(CHINESEMARKETCOMPANY.TRADINGVOLUME, companyObject.dealVolum)
-                                    .set(CHINESEMARKETCOMPANY.OSCILLATION, companyObject.oscillation)
-                                    .set(CHINESEMARKETCOMPANY.TURNOVERRATE, companyObject.exchangeRatio))
-                            .collect(Collectors.toList());
-
-            creator.batch(list).execute();
-
+            if(table instanceof Chinesemarketcompany) {
+                this.insertToChineseMarketTable(companyObjects);
+            }
+            else if(table instanceof Usmarketcompany){
+                this.insertToUSMarketTable(companyObjects);
+            }else{
+                throw new SQLException("Unspecified Table type.");
+            }
             companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
         }
+    }
+
+    /**
+     * Insert companies to Chinese Market table.
+     * @param companyObjects
+     * @throws SQLException
+     */
+    private void insertToChineseMarketTable(SharesQuote[] companyObjects) throws SQLException{
+
+        DSLContext creator = this.getDBJooqCreate();
+
+        // Convert companyobject array to JOOQ query array
+        List<InsertOnDuplicateSetMoreStep<ChinesemarketcompanyRecord>> list =
+                Arrays.stream(companyObjects)
+                        .map(companyObject -> creator
+                                .insertInto(CHINESEMARKETCOMPANY, CHINESEMARKETCOMPANY.STOCKID, CHINESEMARKETCOMPANY.COMPANYNAME,
+                                        CHINESEMARKETCOMPANY.CURRENTPRICE, CHINESEMARKETCOMPANY.CURRENTPRICETIMESTAMP,
+                                        CHINESEMARKETCOMPANY.HIGHEST_PRICE, CHINESEMARKETCOMPANY.LOWEST_PRICE,
+                                        CHINESEMARKETCOMPANY.CLOSEPRICE, CHINESEMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
+                                        CHINESEMARKETCOMPANY.PBR, CHINESEMARKETCOMPANY.PER, CHINESEMARKETCOMPANY.CAPITALIZATIONVALUE,
+                                        CHINESEMARKETCOMPANY.MARKETCAP, CHINESEMARKETCOMPANY.TRADINGVOLUME,
+                                        CHINESEMARKETCOMPANY.TRADINGVALUE, CHINESEMARKETCOMPANY.OSCILLATION,
+                                        CHINESEMARKETCOMPANY.TURNOVERRATE)
+                                .values(companyObject.stockid, companyObject.companyname,
+                                        companyObject.currentPrice,
+                                        new Timestamp(System.currentTimeMillis()),
+                                        companyObject.highestPrice, companyObject.lowestPrice,
+                                        companyObject.closePrice,
+                                        new Timestamp(System.currentTimeMillis()),
+                                        companyObject.price2BookRatio,
+                                        companyObject.price2EarningRatio,
+                                        companyObject.tradingCap, companyObject.marketCap,
+                                        companyObject.dealVolum, companyObject.dealValue,
+                                        companyObject.oscillation, companyObject.exchangeRatio)
+                                .onDuplicateKeyUpdate()
+                                .set(CHINESEMARKETCOMPANY.CURRENTPRICE, companyObject.currentPrice)
+                                .set(CHINESEMARKETCOMPANY.PBR, companyObject.price2BookRatio)
+                                .set(CHINESEMARKETCOMPANY.PER, companyObject.price2EarningRatio)
+                                .set(CHINESEMARKETCOMPANY.OPENPRICE, companyObject.openPrice)
+                                .set(CHINESEMARKETCOMPANY.HIGHEST_PRICE, companyObject.highestPrice)
+                                .set(CHINESEMARKETCOMPANY.LOWEST_PRICE, companyObject.lowestPrice)
+                                .set(CHINESEMARKETCOMPANY.CLOSEPRICE, companyObject.closePrice)
+                                .set(CHINESEMARKETCOMPANY.CURRENTPRICETIMESTAMP,
+                                        new Timestamp(System.currentTimeMillis()))
+                                .set(CHINESEMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
+                                        new Timestamp(System.currentTimeMillis()))
+                                .set(CHINESEMARKETCOMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
+                                .set(CHINESEMARKETCOMPANY.MARKETCAP, companyObject.marketCap)
+                                .set(CHINESEMARKETCOMPANY.TRADINGVALUE, companyObject.dealValue)
+                                .set(CHINESEMARKETCOMPANY.TRADINGVOLUME, companyObject.dealVolum)
+                                .set(CHINESEMARKETCOMPANY.OSCILLATION, companyObject.oscillation)
+                                .set(CHINESEMARKETCOMPANY.TURNOVERRATE, companyObject.exchangeRatio))
+                        .collect(Collectors.toList());
+        creator.batch(list).execute();
+    }
+
+
+    /**
+     * Insert companies to U.S. Market table.
+     * @param companyObjects
+     * @throws SQLException
+     */
+    private void insertToUSMarketTable(SharesQuote[] companyObjects) throws SQLException{
+
+        DSLContext creator = this.getDBJooqCreate();
+
+        // Convert companyobject array to JOOQ query array
+        List<InsertOnDuplicateSetMoreStep<UsmarketcompanyRecord>> list =
+                Arrays.stream(companyObjects)
+                        .map(companyObject -> creator
+                                .insertInto(USMARKETCOMPANY, USMARKETCOMPANY.STOCKID, USMARKETCOMPANY.COMPANYNAME,
+                                        USMARKETCOMPANY.CURRENTPRICE, USMARKETCOMPANY.CURRENTPRICETIMESTAMP,
+                                        USMARKETCOMPANY.HIGHEST_PRICE, USMARKETCOMPANY.LOWEST_PRICE,
+                                        USMARKETCOMPANY.CLOSEPRICE, USMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
+                                        USMARKETCOMPANY.PBR, USMARKETCOMPANY.PER, USMARKETCOMPANY.CAPITALIZATIONVALUE,
+                                        USMARKETCOMPANY.MARKETCAP, USMARKETCOMPANY.TRADINGVOLUME,
+                                        USMARKETCOMPANY.TRADINGVALUE, USMARKETCOMPANY.OSCILLATION,
+                                        USMARKETCOMPANY.TURNOVERRATE)
+                                .values(companyObject.stockid, companyObject.companyname,
+                                        companyObject.currentPrice,
+                                        new Timestamp(System.currentTimeMillis()),
+                                        companyObject.highestPrice, companyObject.lowestPrice,
+                                        companyObject.closePrice,
+                                        new Timestamp(System.currentTimeMillis()),
+                                        companyObject.price2BookRatio,
+                                        companyObject.price2EarningRatio,
+                                        companyObject.tradingCap, companyObject.marketCap,
+                                        companyObject.dealVolum, companyObject.dealValue,
+                                        companyObject.oscillation, companyObject.exchangeRatio)
+                                .onDuplicateKeyUpdate()
+                                .set(USMARKETCOMPANY.CURRENTPRICE, companyObject.currentPrice)
+                                .set(USMARKETCOMPANY.PBR, companyObject.price2BookRatio)
+                                .set(USMARKETCOMPANY.PER, companyObject.price2EarningRatio)
+                                .set(USMARKETCOMPANY.OPENPRICE, companyObject.openPrice)
+                                .set(USMARKETCOMPANY.HIGHEST_PRICE, companyObject.highestPrice)
+                                .set(USMARKETCOMPANY.LOWEST_PRICE, companyObject.lowestPrice)
+                                .set(USMARKETCOMPANY.CLOSEPRICE, companyObject.closePrice)
+                                .set(USMARKETCOMPANY.CURRENTPRICETIMESTAMP,
+                                        new Timestamp(System.currentTimeMillis()))
+                                .set(USMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
+                                        new Timestamp(System.currentTimeMillis()))
+                                .set(USMARKETCOMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
+                                .set(USMARKETCOMPANY.MARKETCAP, companyObject.marketCap)
+                                .set(USMARKETCOMPANY.TRADINGVALUE, companyObject.dealValue)
+                                .set(USMARKETCOMPANY.TRADINGVOLUME, companyObject.dealVolum)
+                                .set(USMARKETCOMPANY.OSCILLATION, companyObject.oscillation)
+                                .set(USMARKETCOMPANY.TURNOVERRATE, companyObject.exchangeRatio))
+                        .collect(Collectors.toList());
+        creator.batch(list).execute();
     }
 
     /**
@@ -316,7 +411,7 @@ public class DatabaseManager {
      * Gets existing stock IDs from Database, returns null if caught exception.
      * @return Stock Id set.
      */
-    public ChinesemarketcompanyRecord[] getExistingStocks() {
+    public ChinesemarketcompanyRecord[] getExistingStocksChinese() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
 
@@ -331,6 +426,24 @@ public class DatabaseManager {
         return null;
     }
 
+    /**
+     * Gets existing stock IDs from Database, returns null if caught exception.
+     * @return Stock Id set.
+     */
+    public UsmarketcompanyRecord[] getExistingStocksUS() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+
+            DSLContext creator = this.getDBJooqCreate();
+            Result<UsmarketcompanyRecord> records = creator.selectFrom(USMARKETCOMPANY).fetch();
+            return records.toArray(new UsmarketcompanyRecord[0]);
+        } catch (ClassNotFoundException e) {
+            Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
+        } catch (SQLException e) {
+            Logger.getGlobal().log(Level.SEVERE, "SQL Exception", e);
+        }
+        return null;
+    }
     /**
      * Get next batch company
      *

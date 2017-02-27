@@ -1,7 +1,7 @@
 CREATE TABLE `StockMarket`.`ChineseMarketCompany`
 (
    stockid                 VARCHAR(20) NOT NULL COMMENT '股票ID',
-   companyname             VARCHAR(20) NOT NULL COMMENT '公司名称',
+   companyname             VARCHAR(255) NOT NULL COMMENT '公司名称',
    currentprice            Double(8, 2) COMMENT 'Current stock price',
    currentpricetimestamp   DATETIME NOT NULL,
    openprice               Double(8, 2) COMMENT '开盘价',

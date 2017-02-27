@@ -1,6 +1,7 @@
 package util;
 
 import dataEngineer.SharesQuote;
+import dataEngineer.financeWebEngine.IWebParser;
 import dataEngineer.financeWebEngine.XueqiuWebParser;
 
 import java.io.IOException;
@@ -19,14 +20,13 @@ public class RunmeFuture {
 
     public boolean isResultConsumed = false;
 
-    public RunmeFuture(Function<Runnable, Future> submit, SharesQuote companyObject) {
+    public RunmeFuture(Function<Runnable, Future> submit, SharesQuote companyObject, IWebParser webParser) {
         this.future = submit.apply(() -> {
 
             // Mark task start time
             startTimeMillis = Optional.of(System.currentTimeMillis());
 
             try {
-                XueqiuWebParser webParser = new XueqiuWebParser();
                 SharesQuote quote = webParser.queryCompanyStock(companyObject.stockid);
                 quote.stockid = companyObject.stockid;
                 quote.companyname = companyObject.companyname;

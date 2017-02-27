@@ -74,8 +74,7 @@ public final class StockCompanyCollection {
                 List<String> line = parseLine(scanner.nextLine());
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a,b) -> a+"\nB: -> "+b), 10, line.size());
                 SharesQuote companyObject = new SharesQuote();
-//                companyObject.code = "sh" + line.get(0).trim();
-                companyObject.stockid = "sh" + line.get(0).trim();
+                companyObject.stockid =line.get(0).trim();
                 companyObject.companyname = line.get(1).trim();
                 companyObjectList.add(companyObject);
             }

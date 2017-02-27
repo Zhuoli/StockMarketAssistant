@@ -1,9 +1,11 @@
 package MarketChinese;
 
+import JooqORM.tables.Chinesemarketcompany;
 import JooqORM.tables.records.ChinesemarketcompanyRecord;
 import dataEngineer.DatabaseManager;
 import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
+import dataEngineer.financeWebEngine.XueqiuWebParser;
 import org.apache.commons.cli.CommandLine;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -17,6 +19,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
+import static JooqORM.Tables.CHINESEMARKETCOMPANY;
 
 /**
  * Created by zhuolil on 2/25/17.
@@ -73,13 +77,13 @@ public class ChineseMarketMaster {
             System.out.println("HHa alive");
 
 
-            DatabaseManager databaseManager = this.initializeDataManager();
+            DatabaseManager databaseManager = DatabaseManager.initializeDataManager();
             if (databaseManager == null) {
                 System.err.println("Failed to initialize database manager, please check database credential. \t Quit.");
                 System.exit(1);
             }
 
-            ChinesemarketcompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocks();
+            ChinesemarketcompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocksChinese();
 
             System.out.println("Company size: " + companies.length);
             System.out.println("Querying company stock from webpage....");
@@ -95,7 +99,7 @@ public class ChineseMarketMaster {
 
             // Submit company query task
             for (SharesQuote companyObject : companies) {
-                RunmeFuture runmeFuture = new RunmeFuture(executorService::submit, companyObject);
+                RunmeFuture runmeFuture = new RunmeFuture(executorService::submit, companyObject, new XueqiuWebParser());
                 futureList.add(runmeFuture);
             }
 
@@ -125,7 +129,7 @@ public class ChineseMarketMaster {
                     SharesQuote sharesQuote = runmeFuture.result.get();
                     runmeFuture.isResultConsumed = true;
                     try {
-                        databaseManager.insertOnDuplicateUpdate(sharesQuote);
+                        databaseManager.insertOnDuplicateUpdate(CHINESEMARKETCOMPANY, sharesQuote);
                         System.out.println(now.toString()
                                 + ": Succeed on update company: " + sharesQuote.companyname
                                 + ";  StockID: " + sharesQuote.stockid);
@@ -153,20 +157,6 @@ public class ChineseMarketMaster {
         }
     }
 
-
-    /**
-     * Reads credential and authenticate SQL connection.
-     *
-     * @return
-     */
-    private DatabaseManager initializeDataManager() {
-        try {
-            return DatabaseManager.GetDatabaseManagerInstance("resourceConfig.xml").Authenticate();
-        } catch (SQLException exc) {
-            exc.printStackTrace();
-            return null;
-        }
-    }
 
 
     /**

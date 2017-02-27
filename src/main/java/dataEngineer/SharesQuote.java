@@ -37,6 +37,8 @@ public class SharesQuote {
 
     public String officialWebUrl;
 
+    public String oneYearTargetPrice;
+
     @Override
     public String toString(){
        return String.format("SharesQuote{stockid: %s, companyname: %s, currentPrice: %f, openPrice: %f, PER: %f}", this.stockid, this.companyname, this.currentPrice, this.openPrice, this.price2EarningRatio);
