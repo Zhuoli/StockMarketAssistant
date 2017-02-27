@@ -131,7 +131,33 @@ public class USMarketMaster {
         }
     }
 
+    /**
+     *
+     */
+    public void run() {
+        if(!this.isInited)
+            this.init();
 
+        while (true) {
+            DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("America/New_York"));
+            try {
+                if (now.getDayOfWeek() > 5) {
+                    System.out.println(now.toString() + ": Nasdaq assistant: Sleep 2 hours on weekend.");
+                    Thread.sleep(2 * 60 * 60 * 1000);
+                    continue;
+                }
+                if (now.getHourOfDay() < 8 || now.getHourOfDay() > 17) {
+                    System.out.println(now.toString() + ": Nasdaq assistant: Sleep 5 minutes off hour.");
+                    Thread.sleep(5 * 60 * 1000);
+                    continue;
+                }
+            } catch (InterruptedException exc) {
+                System.out.println("Nasdaq assistant: Interrupted exception received, gonna launch querryAndUpdate...");
+            }
+            this.querryAndUpdate();
+            System.out.println(LocalDateTime.now().toString() + "Nasdaq assistant: One loop Job done.");
+        }
+    }
 
     /**
      * 1: Sort company array so that those unsearched company moved to head of array and those

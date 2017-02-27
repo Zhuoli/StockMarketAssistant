@@ -3,6 +3,9 @@ import MarketUS.USMarketMaster;
 import org.apache.commons.cli.*;
 import util.MarketConstant;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Entry point.
  */
@@ -19,16 +22,24 @@ public class RunMe {
 
         ChineseMarketMaster chineseMarketMaster = new ChineseMarketMaster(runMe.cmd);
         USMarketMaster usMarketMaster = new USMarketMaster(runMe.cmd);
+        ExecutorService executorService = Executors.newCachedThreadPool();
+
 
         // Run one round of query & update despite the current time
         if (runMe.cmd.hasOption(MarketConstant.DEBUG)) {
-            usMarketMaster.init();
-            usMarketMaster.querryAndUpdate();
-//            chineseMarketMaster.init();
-//            chineseMarketMaster.querryAndUpdate();
+            executorService.submit(() -> {
+                usMarketMaster.init();
+                usMarketMaster.querryAndUpdate();
+            });
+
+            executorService.submit(() -> {
+                chineseMarketMaster.init();
+                chineseMarketMaster.querryAndUpdate();
+            });
         }
 
         chineseMarketMaster.run();
+        usMarketMaster.run();
     }
 
     /**
