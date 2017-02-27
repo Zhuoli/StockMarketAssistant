@@ -1,11 +1,10 @@
 package MarketUS;
 
-import JooqORM.tables.records.UsmarketcompanyRecord;
+import JooqORM.tables.records.UsmarketCompanyRecord;
 import dataEngineer.DatabaseManager;
 import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
 import dataEngineer.financeWebEngine.NasdaqWebParser;
-import dataEngineer.financeWebEngine.XueqiuWebParser;
 import org.apache.commons.cli.CommandLine;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -20,8 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import static JooqORM.Tables.CHINESEMARKETCOMPANY;
-import static JooqORM.Tables.USMARKETCOMPANY;
+import static JooqORM.Tables.USMARKET_COMPANY;
 
 /**
  * Created by zhuolil on 2/25/17.
@@ -58,7 +56,7 @@ public class USMarketMaster {
                 System.exit(1);
             }
 
-            UsmarketcompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocksUS();
+            UsmarketCompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocksUS();
 
             System.out.println("Company size: " + companies.length);
             System.out.println("Querying company stock from webpage....");
@@ -104,7 +102,7 @@ public class USMarketMaster {
                     SharesQuote sharesQuote = runmeFuture.result.get();
                     runmeFuture.isResultConsumed = true;
                     try{
-                        databaseManager.insertOnDuplicateUpdate(USMARKETCOMPANY ,sharesQuote);
+                        databaseManager.insertOnDuplicateUpdate(USMARKET_COMPANY ,sharesQuote);
                         System.out.println(now.toString()
                                 + ": Succeed on update company: " + sharesQuote.companyname
                                 + ";  StockID: " + sharesQuote.stockid);
@@ -147,7 +145,7 @@ public class USMarketMaster {
      * @param array
      *            : All the companies to be sorted.
      */
-    private void sortArray(UsmarketcompanyRecord[] existingCompanyRecords, SharesQuote[] array) {
+    private void sortArray(UsmarketCompanyRecord[] existingCompanyRecords, SharesQuote[] array) {
 
         if (existingCompanyRecords == null || array == null)
             return;
@@ -175,9 +173,9 @@ public class USMarketMaster {
 
         // 2: Sort companies which is in database by lastUpdateDatetime order, e.g: the latest
         // updated company move to tail.
-        HashMap<String, UsmarketcompanyRecord> stockIdCompanyRecordMap = new HashMap<>();
+        HashMap<String, UsmarketCompanyRecord> stockIdCompanyRecordMap = new HashMap<>();
         HashMap<String, SharesQuote> stociIdSharesQuoteMap = new HashMap<>();
-        for (UsmarketcompanyRecord companyRecord : existingCompanyRecords) {
+        for (UsmarketCompanyRecord companyRecord : existingCompanyRecords) {
             stockIdCompanyRecordMap.put(companyRecord.getStockid(), companyRecord);
         }
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
@@ -188,7 +186,7 @@ public class USMarketMaster {
         Assert.assertEquals(stociIdSharesQuoteMap.size(), stockIdCompanyRecordMap.size());
 
         // Sort existingCompanyRecords
-        Arrays.sort(existingCompanyRecords, (UsmarketcompanyRecord a, UsmarketcompanyRecord b) -> a
+        Arrays.sort(existingCompanyRecords, (UsmarketCompanyRecord a, UsmarketCompanyRecord b) -> a
                 .getLastUpdateDateTime()
                 .toLocalDateTime()
                 .compareTo(b.getLastUpdateDateTime().toLocalDateTime()));

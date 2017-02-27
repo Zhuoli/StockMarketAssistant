@@ -1,7 +1,7 @@
 package MarketChinese;
 
-import JooqORM.tables.Chinesemarketcompany;
-import JooqORM.tables.records.ChinesemarketcompanyRecord;
+import JooqORM.tables.ChineseMarketCompany;
+import JooqORM.tables.records.ChineseMarketCompanyRecord;
 import dataEngineer.DatabaseManager;
 import dataEngineer.SharesQuote;
 import dataEngineer.StockCompanyCollection;
@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import static JooqORM.Tables.CHINESEMARKETCOMPANY;
+import static JooqORM.Tables.CHINESE_MARKET_COMPANY;
 
 /**
  * Created by zhuolil on 2/25/17.
@@ -83,7 +83,7 @@ public class ChineseMarketMaster {
                 System.exit(1);
             }
 
-            ChinesemarketcompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocksChinese();
+            ChineseMarketCompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocksChinese();
 
             System.out.println("Company size: " + companies.length);
             System.out.println("Querying company stock from webpage....");
@@ -129,7 +129,7 @@ public class ChineseMarketMaster {
                     SharesQuote sharesQuote = runmeFuture.result.get();
                     runmeFuture.isResultConsumed = true;
                     try {
-                        databaseManager.insertOnDuplicateUpdate(CHINESEMARKETCOMPANY, sharesQuote);
+                        databaseManager.insertOnDuplicateUpdate(CHINESE_MARKET_COMPANY, sharesQuote);
                         System.out.println(now.toString()
                                 + ": Succeed on update company: " + sharesQuote.companyname
                                 + ";  StockID: " + sharesQuote.stockid);
@@ -171,7 +171,7 @@ public class ChineseMarketMaster {
      * @param array
      *            : All the companies to be sorted.
      */
-    private void sortArray(ChinesemarketcompanyRecord[] existingCompanyRecords, SharesQuote[] array) {
+    private void sortArray(ChineseMarketCompanyRecord[] existingCompanyRecords, SharesQuote[] array) {
 
         if (existingCompanyRecords == null || array == null)
             return;
@@ -199,9 +199,9 @@ public class ChineseMarketMaster {
 
         // 2: Sort companies which is in database by lastUpdateDatetime order, e.g: the latest
         // updated company move to tail.
-        HashMap<String, ChinesemarketcompanyRecord> stockIdCompanyRecordMap = new HashMap<>();
+        HashMap<String, ChineseMarketCompanyRecord> stockIdCompanyRecordMap = new HashMap<>();
         HashMap<String, SharesQuote> stociIdSharesQuoteMap = new HashMap<>();
-        for (ChinesemarketcompanyRecord companyRecord : existingCompanyRecords) {
+        for (ChineseMarketCompanyRecord companyRecord : existingCompanyRecords) {
             stockIdCompanyRecordMap.put(companyRecord.getStockid(), companyRecord);
         }
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
@@ -212,7 +212,7 @@ public class ChineseMarketMaster {
         Assert.assertEquals(stociIdSharesQuoteMap.size(), stockIdCompanyRecordMap.size());
 
         // Sort existingCompanyRecords
-        Arrays.sort(existingCompanyRecords, (ChinesemarketcompanyRecord a, ChinesemarketcompanyRecord b) -> a
+        Arrays.sort(existingCompanyRecords, (ChineseMarketCompanyRecord a, ChineseMarketCompanyRecord b) -> a
                 .getLastUpdateDateTime()
                 .toLocalDateTime()
                 .compareTo(b.getLastUpdateDateTime().toLocalDateTime()));

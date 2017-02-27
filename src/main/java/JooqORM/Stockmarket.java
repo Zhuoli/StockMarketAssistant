@@ -4,8 +4,8 @@
 package JooqORM;
 
 
-import JooqORM.tables.Chinesemarketcompany;
-import JooqORM.tables.Usmarketcompany;
+import JooqORM.tables.ChineseMarketCompany;
+import JooqORM.tables.UsmarketCompany;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Stockmarket extends SchemaImpl {
 
-    private static final long serialVersionUID = 394317073;
+    private static final long serialVersionUID = -1803203423;
 
     /**
      * The reference instance of <code>StockMarket</code>
@@ -39,14 +39,14 @@ public class Stockmarket extends SchemaImpl {
     public static final Stockmarket STOCKMARKET = new Stockmarket();
 
     /**
-     * The table <code>StockMarket.ChineseMarketCompany</code>.
+     * The table <code>StockMarket.chinese_market_company</code>.
      */
-    public final Chinesemarketcompany CHINESEMARKETCOMPANY = JooqORM.tables.Chinesemarketcompany.CHINESEMARKETCOMPANY;
+    public final ChineseMarketCompany CHINESE_MARKET_COMPANY = JooqORM.tables.ChineseMarketCompany.CHINESE_MARKET_COMPANY;
 
     /**
-     * The table <code>StockMarket.USMarketCompany</code>.
+     * The table <code>StockMarket.usmarket_company</code>.
      */
-    public final Usmarketcompany USMARKETCOMPANY = JooqORM.tables.Usmarketcompany.USMARKETCOMPANY;
+    public final UsmarketCompany USMARKET_COMPANY = JooqORM.tables.UsmarketCompany.USMARKET_COMPANY;
 
     /**
      * No further instances allowed
@@ -73,7 +73,7 @@ public class Stockmarket extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
-            Chinesemarketcompany.CHINESEMARKETCOMPANY,
-            Usmarketcompany.USMARKETCOMPANY);
+            ChineseMarketCompany.CHINESE_MARKET_COMPANY,
+            UsmarketCompany.USMARKET_COMPANY);
     }
 }

@@ -1,9 +1,9 @@
 package dataEngineer;
 
-import JooqORM.tables.Chinesemarketcompany;
-import JooqORM.tables.Usmarketcompany;
-import JooqORM.tables.records.ChinesemarketcompanyRecord;
-import JooqORM.tables.records.UsmarketcompanyRecord;
+import JooqORM.tables.ChineseMarketCompany;
+import JooqORM.tables.UsmarketCompany;
+import JooqORM.tables.records.ChineseMarketCompanyRecord;
+import JooqORM.tables.records.UsmarketCompanyRecord;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
@@ -28,8 +28,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static JooqORM.Tables.CHINESEMARKETCOMPANY;
-import static JooqORM.Tables.USMARKETCOMPANY;
+import static JooqORM.Tables.CHINESE_MARKET_COMPANY;
+import static JooqORM.Tables.USMARKET_COMPANY;
 
 /**
  * Interacts with AWS Database through JOOQ package.
@@ -162,9 +162,9 @@ public class DatabaseManager {
 
         this.conn = DriverManager.getConnection(this.url, this.userName, this.password);
         this.globalCreate = DSL.using(this.conn, SQLDialect.MYSQL);
-        Optional<Table<?>> table = this.GetTable(this.globalCreate, CHINESEMARKETCOMPANY.getName());
+        Optional<Table<?>> table = this.GetTable(this.globalCreate, CHINESE_MARKET_COMPANY.getName());
         if (!table.isPresent()) {
-            this.globalCreate.createTable(CHINESEMARKETCOMPANY).columns(CHINESEMARKETCOMPANY.fields()).execute();
+            this.globalCreate.createTable(CHINESE_MARKET_COMPANY).columns(CHINESE_MARKET_COMPANY.fields()).execute();
         }
         return this.globalCreate;
     }
@@ -207,13 +207,13 @@ public class DatabaseManager {
         while (companyObjects != null && companyObjects.length > 0) {
 
             // Convert companyobject array to JOOQ query array
-            List<InsertFinalStep<ChinesemarketcompanyRecord>> list =
+            List<InsertFinalStep<ChineseMarketCompanyRecord>> list =
                     Arrays.stream(companyObjects)
                             .map(companyObject -> creator
-                                    .insertInto(CHINESEMARKETCOMPANY, CHINESEMARKETCOMPANY.STOCKID, CHINESEMARKETCOMPANY.COMPANYNAME,
-                                            CHINESEMARKETCOMPANY.CURRENTPRICETIMESTAMP,
-                                            CHINESEMARKETCOMPANY.LAST_UPDATE_DATE_TIME, CHINESEMARKETCOMPANY.PBR,
-                                            CHINESEMARKETCOMPANY.PER, CHINESEMARKETCOMPANY.CURRENTPRICE)
+                                    .insertInto(CHINESE_MARKET_COMPANY, CHINESE_MARKET_COMPANY.STOCKID, CHINESE_MARKET_COMPANY.COMPANYNAME,
+                                            CHINESE_MARKET_COMPANY.CURRENTPRICETIMESTAMP,
+                                            CHINESE_MARKET_COMPANY.LAST_UPDATE_DATE_TIME, CHINESE_MARKET_COMPANY.PBR,
+                                            CHINESE_MARKET_COMPANY.PER, CHINESE_MARKET_COMPANY.CURRENTPRICE)
                                     .values(companyObject.stockid, companyObject.companyname,
                                             new Timestamp(System.currentTimeMillis()),
                                             new Timestamp(System.currentTimeMillis()),
@@ -262,10 +262,10 @@ public class DatabaseManager {
 
         // Batch insert companies
         while (companyObjects != null && companyObjects.length > 0) {
-            if(table instanceof Chinesemarketcompany) {
+            if(table instanceof ChineseMarketCompany) {
                 this.insertToChineseMarketTable(companyObjects);
             }
-            else if(table instanceof Usmarketcompany){
+            else if(table instanceof UsmarketCompany){
                 this.insertToUSMarketTable(companyObjects);
             }else{
                 throw new SQLException("Unspecified Table type.");
@@ -284,17 +284,17 @@ public class DatabaseManager {
         DSLContext creator = this.getDBJooqCreate();
 
         // Convert companyobject array to JOOQ query array
-        List<InsertOnDuplicateSetMoreStep<ChinesemarketcompanyRecord>> list =
+        List<InsertOnDuplicateSetMoreStep<ChineseMarketCompanyRecord>> list =
                 Arrays.stream(companyObjects)
                         .map(companyObject -> creator
-                                .insertInto(CHINESEMARKETCOMPANY, CHINESEMARKETCOMPANY.STOCKID, CHINESEMARKETCOMPANY.COMPANYNAME,
-                                        CHINESEMARKETCOMPANY.CURRENTPRICE, CHINESEMARKETCOMPANY.CURRENTPRICETIMESTAMP,
-                                        CHINESEMARKETCOMPANY.HIGHEST_PRICE, CHINESEMARKETCOMPANY.LOWEST_PRICE,
-                                        CHINESEMARKETCOMPANY.CLOSEPRICE, CHINESEMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
-                                        CHINESEMARKETCOMPANY.PBR, CHINESEMARKETCOMPANY.PER, CHINESEMARKETCOMPANY.CAPITALIZATIONVALUE,
-                                        CHINESEMARKETCOMPANY.MARKETCAP, CHINESEMARKETCOMPANY.TRADINGVOLUME,
-                                        CHINESEMARKETCOMPANY.TRADINGVALUE, CHINESEMARKETCOMPANY.OSCILLATION,
-                                        CHINESEMARKETCOMPANY.TURNOVERRATE)
+                                .insertInto(CHINESE_MARKET_COMPANY, CHINESE_MARKET_COMPANY.STOCKID, CHINESE_MARKET_COMPANY.COMPANYNAME,
+                                        CHINESE_MARKET_COMPANY.CURRENTPRICE, CHINESE_MARKET_COMPANY.CURRENTPRICETIMESTAMP,
+                                        CHINESE_MARKET_COMPANY.HIGHEST_PRICE, CHINESE_MARKET_COMPANY.LOWEST_PRICE,
+                                        CHINESE_MARKET_COMPANY.CLOSE_PRICE, CHINESE_MARKET_COMPANY.LAST_UPDATE_DATE_TIME,
+                                        CHINESE_MARKET_COMPANY.PBR, CHINESE_MARKET_COMPANY.PER, CHINESE_MARKET_COMPANY.CAPITALIZATIONVALUE,
+                                        CHINESE_MARKET_COMPANY.MARKETCAP, CHINESE_MARKET_COMPANY.TRADINGVOLUME,
+                                        CHINESE_MARKET_COMPANY.TRADINGVALUE, CHINESE_MARKET_COMPANY.OSCILLATION,
+                                        CHINESE_MARKET_COMPANY.TURNOVERRATE)
                                 .values(companyObject.stockid, companyObject.companyname,
                                         companyObject.currentPrice,
                                         new Timestamp(System.currentTimeMillis()),
@@ -307,23 +307,23 @@ public class DatabaseManager {
                                         companyObject.dealVolum, companyObject.dealValue,
                                         companyObject.oscillation, companyObject.exchangeRatio)
                                 .onDuplicateKeyUpdate()
-                                .set(CHINESEMARKETCOMPANY.CURRENTPRICE, companyObject.currentPrice)
-                                .set(CHINESEMARKETCOMPANY.PBR, companyObject.price2BookRatio)
-                                .set(CHINESEMARKETCOMPANY.PER, companyObject.price2EarningRatio)
-                                .set(CHINESEMARKETCOMPANY.OPENPRICE, companyObject.openPrice)
-                                .set(CHINESEMARKETCOMPANY.HIGHEST_PRICE, companyObject.highestPrice)
-                                .set(CHINESEMARKETCOMPANY.LOWEST_PRICE, companyObject.lowestPrice)
-                                .set(CHINESEMARKETCOMPANY.CLOSEPRICE, companyObject.closePrice)
-                                .set(CHINESEMARKETCOMPANY.CURRENTPRICETIMESTAMP,
+                                .set(CHINESE_MARKET_COMPANY.CURRENTPRICE, companyObject.currentPrice)
+                                .set(CHINESE_MARKET_COMPANY.PBR, companyObject.price2BookRatio)
+                                .set(CHINESE_MARKET_COMPANY.PER, companyObject.price2EarningRatio)
+                                .set(CHINESE_MARKET_COMPANY.OPENPRICE, companyObject.openPrice)
+                                .set(CHINESE_MARKET_COMPANY.HIGHEST_PRICE, companyObject.highestPrice)
+                                .set(CHINESE_MARKET_COMPANY.LOWEST_PRICE, companyObject.lowestPrice)
+                                .set(CHINESE_MARKET_COMPANY.CLOSE_PRICE, companyObject.closePrice)
+                                .set(CHINESE_MARKET_COMPANY.CURRENTPRICETIMESTAMP,
                                         new Timestamp(System.currentTimeMillis()))
-                                .set(CHINESEMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
+                                .set(CHINESE_MARKET_COMPANY.LAST_UPDATE_DATE_TIME,
                                         new Timestamp(System.currentTimeMillis()))
-                                .set(CHINESEMARKETCOMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
-                                .set(CHINESEMARKETCOMPANY.MARKETCAP, companyObject.marketCap)
-                                .set(CHINESEMARKETCOMPANY.TRADINGVALUE, companyObject.dealValue)
-                                .set(CHINESEMARKETCOMPANY.TRADINGVOLUME, companyObject.dealVolum)
-                                .set(CHINESEMARKETCOMPANY.OSCILLATION, companyObject.oscillation)
-                                .set(CHINESEMARKETCOMPANY.TURNOVERRATE, companyObject.exchangeRatio))
+                                .set(CHINESE_MARKET_COMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
+                                .set(CHINESE_MARKET_COMPANY.MARKETCAP, companyObject.marketCap)
+                                .set(CHINESE_MARKET_COMPANY.TRADINGVALUE, companyObject.dealValue)
+                                .set(CHINESE_MARKET_COMPANY.TRADINGVOLUME, companyObject.dealVolum)
+                                .set(CHINESE_MARKET_COMPANY.OSCILLATION, companyObject.oscillation)
+                                .set(CHINESE_MARKET_COMPANY.TURNOVERRATE, companyObject.exchangeRatio))
                         .collect(Collectors.toList());
         creator.batch(list).execute();
     }
@@ -339,17 +339,17 @@ public class DatabaseManager {
         DSLContext creator = this.getDBJooqCreate();
 
         // Convert companyobject array to JOOQ query array
-        List<InsertOnDuplicateSetMoreStep<UsmarketcompanyRecord>> list =
+        List<InsertOnDuplicateSetMoreStep<UsmarketCompanyRecord>> list =
                 Arrays.stream(companyObjects)
                         .map(companyObject -> creator
-                                .insertInto(USMARKETCOMPANY, USMARKETCOMPANY.STOCKID, USMARKETCOMPANY.COMPANYNAME,
-                                        USMARKETCOMPANY.CURRENTPRICE, USMARKETCOMPANY.CURRENTPRICETIMESTAMP,
-                                        USMARKETCOMPANY.HIGHEST_PRICE, USMARKETCOMPANY.LOWEST_PRICE,
-                                        USMARKETCOMPANY.CLOSEPRICE, USMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
-                                        USMARKETCOMPANY.PBR, USMARKETCOMPANY.PER, USMARKETCOMPANY.CAPITALIZATIONVALUE,
-                                        USMARKETCOMPANY.MARKETCAP, USMARKETCOMPANY.TRADINGVOLUME,
-                                        USMARKETCOMPANY.TRADINGVALUE, USMARKETCOMPANY.OSCILLATION,
-                                        USMARKETCOMPANY.TURNOVERRATE)
+                                .insertInto(USMARKET_COMPANY, USMARKET_COMPANY.STOCKID, USMARKET_COMPANY.COMPANYNAME,
+                                        USMARKET_COMPANY.CURRENTPRICE, USMARKET_COMPANY.CURRENTPRICETIMESTAMP,
+                                        USMARKET_COMPANY.HIGHEST_PRICE, USMARKET_COMPANY.LOWEST_PRICE,
+                                        USMARKET_COMPANY.CLOSE_PRICE, USMARKET_COMPANY.LAST_UPDATE_DATE_TIME,
+                                        USMARKET_COMPANY.PBR, USMARKET_COMPANY.PER, USMARKET_COMPANY.CAPITALIZATIONVALUE,
+                                        USMARKET_COMPANY.MARKETCAP, USMARKET_COMPANY.TRADINGVOLUME,
+                                        USMARKET_COMPANY.TRADINGVALUE, USMARKET_COMPANY.OSCILLATION,
+                                        USMARKET_COMPANY.TURNOVERRATE)
                                 .values(companyObject.stockid, companyObject.companyname,
                                         companyObject.currentPrice,
                                         new Timestamp(System.currentTimeMillis()),
@@ -362,23 +362,23 @@ public class DatabaseManager {
                                         companyObject.dealVolum, companyObject.dealValue,
                                         companyObject.oscillation, companyObject.exchangeRatio)
                                 .onDuplicateKeyUpdate()
-                                .set(USMARKETCOMPANY.CURRENTPRICE, companyObject.currentPrice)
-                                .set(USMARKETCOMPANY.PBR, companyObject.price2BookRatio)
-                                .set(USMARKETCOMPANY.PER, companyObject.price2EarningRatio)
-                                .set(USMARKETCOMPANY.OPENPRICE, companyObject.openPrice)
-                                .set(USMARKETCOMPANY.HIGHEST_PRICE, companyObject.highestPrice)
-                                .set(USMARKETCOMPANY.LOWEST_PRICE, companyObject.lowestPrice)
-                                .set(USMARKETCOMPANY.CLOSEPRICE, companyObject.closePrice)
-                                .set(USMARKETCOMPANY.CURRENTPRICETIMESTAMP,
+                                .set(USMARKET_COMPANY.CURRENTPRICE, companyObject.currentPrice)
+                                .set(USMARKET_COMPANY.PBR, companyObject.price2BookRatio)
+                                .set(USMARKET_COMPANY.PER, companyObject.price2EarningRatio)
+                                .set(USMARKET_COMPANY.OPENPRICE, companyObject.openPrice)
+                                .set(USMARKET_COMPANY.HIGHEST_PRICE, companyObject.highestPrice)
+                                .set(USMARKET_COMPANY.LOWEST_PRICE, companyObject.lowestPrice)
+                                .set(USMARKET_COMPANY.CLOSE_PRICE, companyObject.closePrice)
+                                .set(USMARKET_COMPANY.CURRENTPRICETIMESTAMP,
                                         new Timestamp(System.currentTimeMillis()))
-                                .set(USMARKETCOMPANY.LAST_UPDATE_DATE_TIME,
+                                .set(USMARKET_COMPANY.LAST_UPDATE_DATE_TIME,
                                         new Timestamp(System.currentTimeMillis()))
-                                .set(USMARKETCOMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
-                                .set(USMARKETCOMPANY.MARKETCAP, companyObject.marketCap)
-                                .set(USMARKETCOMPANY.TRADINGVALUE, companyObject.dealValue)
-                                .set(USMARKETCOMPANY.TRADINGVOLUME, companyObject.dealVolum)
-                                .set(USMARKETCOMPANY.OSCILLATION, companyObject.oscillation)
-                                .set(USMARKETCOMPANY.TURNOVERRATE, companyObject.exchangeRatio))
+                                .set(USMARKET_COMPANY.CAPITALIZATIONVALUE, companyObject.tradingCap)
+                                .set(USMARKET_COMPANY.MARKETCAP, companyObject.marketCap)
+                                .set(USMARKET_COMPANY.TRADINGVALUE, companyObject.dealValue)
+                                .set(USMARKET_COMPANY.TRADINGVOLUME, companyObject.dealVolum)
+                                .set(USMARKET_COMPANY.OSCILLATION, companyObject.oscillation)
+                                .set(USMARKET_COMPANY.TURNOVERRATE, companyObject.exchangeRatio))
                         .collect(Collectors.toList());
         creator.batch(list).execute();
     }
@@ -392,12 +392,12 @@ public class DatabaseManager {
             Class.forName("com.mysql.jdbc.Driver");
 
             DSLContext creator = this.getDBJooqCreate();
-            Result<Record1<String>> r = creator.select(CHINESEMARKETCOMPANY.STOCKID).from(CHINESEMARKETCOMPANY).fetch();
-            r.toArray(new Record[0])[0].get(CHINESEMARKETCOMPANY.field(CHINESEMARKETCOMPANY.STOCKID));
+            Result<Record1<String>> r = creator.select(CHINESE_MARKET_COMPANY.STOCKID).from(CHINESE_MARKET_COMPANY).fetch();
+            r.toArray(new Record[0])[0].get(CHINESE_MARKET_COMPANY.field(CHINESE_MARKET_COMPANY.STOCKID));
 
             return Arrays
                     .stream(r.toArray(new Record[0]))
-                    .map(record -> record.get(CHINESEMARKETCOMPANY.field(CHINESEMARKETCOMPANY.STOCKID)))
+                    .map(record -> record.get(CHINESE_MARKET_COMPANY.field(CHINESE_MARKET_COMPANY.STOCKID)))
                     .collect(Collectors.toSet());
         } catch (ClassNotFoundException e) {
             Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
@@ -411,13 +411,13 @@ public class DatabaseManager {
      * Gets existing stock IDs from Database, returns null if caught exception.
      * @return Stock Id set.
      */
-    public ChinesemarketcompanyRecord[] getExistingStocksChinese() {
+    public ChineseMarketCompanyRecord[] getExistingStocksChinese() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
 
             DSLContext creator = this.getDBJooqCreate();
-            Result<ChinesemarketcompanyRecord> records = creator.selectFrom(CHINESEMARKETCOMPANY).fetch();
-            return records.toArray(new ChinesemarketcompanyRecord[0]);
+            Result<ChineseMarketCompanyRecord> records = creator.selectFrom(CHINESE_MARKET_COMPANY).fetch();
+            return records.toArray(new ChineseMarketCompanyRecord[0]);
         } catch (ClassNotFoundException e) {
             Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
         } catch (SQLException e) {
@@ -430,13 +430,13 @@ public class DatabaseManager {
      * Gets existing stock IDs from Database, returns null if caught exception.
      * @return Stock Id set.
      */
-    public UsmarketcompanyRecord[] getExistingStocksUS() {
+    public UsmarketCompanyRecord[] getExistingStocksUS() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
 
             DSLContext creator = this.getDBJooqCreate();
-            Result<UsmarketcompanyRecord> records = creator.selectFrom(USMARKETCOMPANY).fetch();
-            return records.toArray(new UsmarketcompanyRecord[0]);
+            Result<UsmarketCompanyRecord> records = creator.selectFrom(USMARKET_COMPANY).fetch();
+            return records.toArray(new UsmarketCompanyRecord[0]);
         } catch (ClassNotFoundException e) {
             Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
         } catch (SQLException e) {

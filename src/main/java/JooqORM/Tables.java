@@ -4,8 +4,8 @@
 package JooqORM;
 
 
-import JooqORM.tables.Chinesemarketcompany;
-import JooqORM.tables.Usmarketcompany;
+import JooqORM.tables.ChineseMarketCompany;
+import JooqORM.tables.UsmarketCompany;
 
 import javax.annotation.Generated;
 
@@ -24,12 +24,12 @@ import javax.annotation.Generated;
 public class Tables {
 
     /**
-     * The table <code>StockMarket.ChineseMarketCompany</code>.
+     * The table <code>StockMarket.chinese_market_company</code>.
      */
-    public static final Chinesemarketcompany CHINESEMARKETCOMPANY = JooqORM.tables.Chinesemarketcompany.CHINESEMARKETCOMPANY;
+    public static final ChineseMarketCompany CHINESE_MARKET_COMPANY = JooqORM.tables.ChineseMarketCompany.CHINESE_MARKET_COMPANY;
 
     /**
-     * The table <code>StockMarket.USMarketCompany</code>.
+     * The table <code>StockMarket.usmarket_company</code>.
      */
-    public static final Usmarketcompany USMARKETCOMPANY = JooqORM.tables.Usmarketcompany.USMARKETCOMPANY;
+    public static final UsmarketCompany USMARKET_COMPANY = JooqORM.tables.UsmarketCompany.USMARKET_COMPANY;
 }
