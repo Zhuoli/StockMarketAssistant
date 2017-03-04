@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class ChineseMarketCompany extends TableImpl<ChineseMarketCompanyRecord> {
 
-    private static final long serialVersionUID = -534426070;
+    private static final long serialVersionUID = -179307100;
 
     /**
      * The reference instance of <code>StockMarket.chinese_market_company</code>
@@ -134,6 +134,11 @@ public class ChineseMarketCompany extends TableImpl<ChineseMarketCompanyRecord> 
      * The column <code>StockMarket.chinese_market_company.turnoverrate</code>. 换手率
      */
     public final TableField<ChineseMarketCompanyRecord, String> TURNOVERRATE = createField("turnoverrate", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "换手率");
+
+    /**
+     * The column <code>StockMarket.chinese_market_company.listing_date</code>.
+     */
+    public final TableField<ChineseMarketCompanyRecord, Timestamp> LISTING_DATE = createField("listing_date", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
     /**
      * Create a <code>StockMarket.chinese_market_company</code> table reference
