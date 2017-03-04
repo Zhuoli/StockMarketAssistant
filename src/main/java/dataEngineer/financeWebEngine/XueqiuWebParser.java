@@ -8,6 +8,7 @@ import org.jsoup.select.Elements;
 import org.junit.Assert;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -15,13 +16,12 @@ import java.util.regex.Pattern;
 /**
  * Created by zhuolil on 2/2/17.
  */
-public class XueqiuWebParser implements IWebParser{
+public class XueqiuWebParser implements IWebParser {
 
-    final static String URL_BASE =
-            "https://xueqiu.com/S";
+    final static String URL_BASE = "https://xueqiu.com/S";
 
-    final  static  String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
-
+    final static String USER_AGENT =
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
 
     final static String PRICE = "price";
 
@@ -45,35 +45,44 @@ public class XueqiuWebParser implements IWebParser{
     public XueqiuWebParser() {
         // Does nothing
     }
-    public SharesQuote queryCompanyStock(String symbol) throws IOException{
+
+    public SharesQuote queryCompanyStock(String symbol) throws IOException {
         Map<String, String> map = this.queryTableDetail(symbol);
-        SharesQuote sharesQuote = new SharesQuote();
-        sharesQuote.currentPrice = DOUBLE_PATTERN.matcher(map.get(PRICE)).find() ? Double.valueOf(map.get(PRICE)) : 0;
-        sharesQuote.closePrice = DOUBLE_PATTERN.matcher(map.get(CLOSE_PRICE)).find() ? Double.parseDouble(map.get(CLOSE_PRICE)) : 0;
-        sharesQuote.highestPrice = DOUBLE_PATTERN.matcher(map.get(HIGHEST_PRICE)).find() ? Double.parseDouble(map.get(HIGHEST_PRICE)) : 0;
-        sharesQuote.lowestPrice = DOUBLE_PATTERN.matcher(map.get(LOWEST_PRICE)).find() ? Double.parseDouble(map.get(LOWEST_PRICE)) : 0;
-        sharesQuote.openPrice = DOUBLE_PATTERN.matcher(map.get(OPEN_PRICE)).find() ? Double.parseDouble(map.get(OPEN_PRICE)) : 0;
-
-        sharesQuote.dealVolum = map.get(DEAL_VOLUM);
-        sharesQuote.dealValue = map.get(DEAL_VALUE);
-        sharesQuote.marketCap = map.get(MARKET_CAP);
-        sharesQuote.tradingCap = map.get(TRADING_CAP);
-
-        sharesQuote.oscillation = map.get(OSCILLATION);
-        sharesQuote.price2EarningRatio = DOUBLE_PATTERN.matcher(map.get(PTE)).find() ? Double.parseDouble(map.get(PTE)) : 0;
-        sharesQuote.price2BookRatio = DOUBLE_PATTERN.matcher(map.get(PTB)).find() ? Double.parseDouble(map.get(PTB)) : 0;
-
+        SharesQuote sharesQuote =
+                SharesQuote
+                        .builder()
+                        .currentPrice(
+                                DOUBLE_PATTERN.matcher(map.get(PRICE)).find() ? Double.valueOf(map
+                                        .get(PRICE)) : 0)
+                        .closePrice(
+                                DOUBLE_PATTERN.matcher(map.get(CLOSE_PRICE)).find() ? Double
+                                        .parseDouble(map.get(CLOSE_PRICE)) : 0)
+                        .highestPrice(DOUBLE_PATTERN.matcher(map.get(HIGHEST_PRICE)).find() ? Double.parseDouble(map
+                                .get(HIGHEST_PRICE)) : 0)
+                        .lowestPrice(DOUBLE_PATTERN.matcher(map.get(LOWEST_PRICE)).find() ? Double.parseDouble(map
+                                .get(LOWEST_PRICE)) : 0)
+                        .openPrice(DOUBLE_PATTERN.matcher(map.get(OPEN_PRICE)).find() ? Double.parseDouble(map
+                                .get(OPEN_PRICE)) : 0)
+                        .dealVolum(map.get(DEAL_VOLUM))
+                        .dealValue(map.get(DEAL_VALUE))
+                        .marketCap(map.get(MARKET_CAP))
+                        .tradingCap(map.get(TRADING_CAP))
+                        .oscillation(map.get(OSCILLATION))
+                        .price2BookRatio(DOUBLE_PATTERN.matcher(map.get(PTB)).find() ? Double.parseDouble(map.get(PTB)) : 0)
+                        .price2EarningRatio(DOUBLE_PATTERN.matcher(map.get(PTE)).find() ? Double.parseDouble(map.get(PTE)) : 0)
+                        .listingDate(new Date(System.currentTimeMillis()))
+                        .build();
         return sharesQuote;
     }
 
-    private Map<String, String> queryTableDetail(String stocId){
+    private Map<String, String> queryTableDetail(String stocId) {
         String reportUrl = XueqiuWebParser.URL_BASE + "/" + stocId;
         try {
 
             // Parse html to get target element
             Document dom = Jsoup.connect(reportUrl).userAgent(XueqiuWebParser.USER_AGENT).get();
 
-            Elements elements =dom.getElementsByAttribute("data-current");
+            Elements elements = dom.getElementsByAttribute("data-current");
             String currentPrice = "0";
             if (elements.size() == 1)
                 currentPrice = elements.first().text();
@@ -82,7 +91,7 @@ public class XueqiuWebParser implements IWebParser{
                 currentPrice = currentPrice.substring(1);
 
             elements = dom.getElementsByClass("topTable");
-            if (elements.size()!=1){
+            if (elements.size() != 1) {
                 throw new Exception("element size should equal to one.");
             }
 
@@ -93,9 +102,10 @@ public class XueqiuWebParser implements IWebParser{
 
             HashMap<String, String> map = new HashMap<>();
             map.put(PRICE, currentPrice);
-            for(String keyValue : keyValuePairs){
+            for (String keyValue : keyValuePairs) {
                 String[] keyValuePair = keyValue.split("：");
-                Assert.assertTrue("Xueqiu Table Keyvalue length should be 2. but is '" + keyValue + "'", keyValuePair.length == 2);
+                Assert.assertTrue("Xueqiu Table Keyvalue length should be 2. but is '" + keyValue
+                        + "'", keyValuePair.length == 2);
                 map.put(keyValuePair[0].trim(), keyValuePair[1].trim());
             }
 
@@ -104,9 +114,7 @@ public class XueqiuWebParser implements IWebParser{
                 map.put(PTE, map.get(PTE).substring(0, map.get(PTE).indexOf("/")));
 
             return map;
-        }
-        catch (Exception exc)
-        {
+        } catch (Exception exc) {
             System.err.println("Error while processing url: " + reportUrl);
             exc.printStackTrace();
         }

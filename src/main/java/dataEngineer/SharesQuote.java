@@ -1,46 +1,50 @@
 package dataEngineer;
 
+import lombok.Builder;
+import lombok.Data;
+
+import java.util.Date;
+
 /**
  * Represents an CompanyObject's Shares Quote.
  */
+
+@Builder
+@Data
 public class SharesQuote {
 
-    public String stockid;
-    public String companyname;
+    private String stockid;
+    private String companyname;
 
-    public double currentPrice;
+    private double currentPrice;
 
-    public double openPrice;
-    public double highestPrice;
-    public double lowestPrice;
-    public double closePrice;
+    private double openPrice;
+    private double highestPrice;
+    private double lowestPrice;
+    private double closePrice;
 
     // 成交量
-    public String dealVolum;
+    private String dealVolum;
 
     // 成交额
-    public String dealValue;
+    private String dealValue;
     // 总市值
-    public String marketCap;
+    private String marketCap;
     // 流通市值
-    public String tradingCap;
+    private String tradingCap;
 
     // 振幅
-    public String oscillation;
+    private String oscillation;
     // 换手率
-    public String exchangeRatio;
+    private String exchangeRatio;
     // 市盈率
-    public double price2EarningRatio;
+    private double price2EarningRatio;
     // 市净率
-    public double price2BookRatio;
+    private double price2BookRatio;
 
+    private String officialWebUrl;
 
-    public String officialWebUrl;
+    private String oneYearTargetPrice;
 
-    public String oneYearTargetPrice;
-
-    @Override
-    public String toString(){
-       return String.format("SharesQuote{stockid: %s, companyname: %s, currentPrice: %f, openPrice: %f, PER: %f}", this.stockid, this.companyname, this.currentPrice, this.openPrice, this.price2EarningRatio);
-    }
+    private Date listingDate;
 }

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import static JooqORM.Tables.CHINESE_MARKET_COMPANY;
 
 /**
- * Created by zhuolil on 2/25/17.
+ * Chinese stock market master.
  */
 public class ChineseMarketMaster {
 
@@ -131,8 +131,8 @@ public class ChineseMarketMaster {
                     try {
                         databaseManager.insertOnDuplicateUpdate(CHINESE_MARKET_COMPANY, sharesQuote);
                         System.out.println(now.toString()
-                                + ": Succeed on update company: " + sharesQuote.companyname
-                                + ";  StockID: " + sharesQuote.stockid);
+                                + ": Succeed on update company: " + sharesQuote.getCompanyname()
+                                + ";  StockID: " + sharesQuote.getStockid());
                     } catch (SQLException exc) {
                         exc.printStackTrace();
                         System.out.println(sharesQuote);
@@ -152,7 +152,10 @@ public class ChineseMarketMaster {
 
                 }
             }
-        } finally {
+        } catch (Exception exc){
+            exc.printStackTrace();
+        }
+        finally {
             DatabaseManager.close();
         }
     }
@@ -187,7 +190,7 @@ public class ChineseMarketMaster {
         // companies already in databaes moved to tail.
         for (int idx = 0; idx <= nextSeenIdx; idx++) {
             // If current stock is seen in records
-            if (stockIdSet.contains(array[idx].stockid)) {
+            if (stockIdSet.contains(array[idx].getStockid())) {
                 // Move this stock to tail
                 SharesQuote tmp = array[nextSeenIdx];
                 array[nextSeenIdx] = array[idx];
@@ -205,7 +208,7 @@ public class ChineseMarketMaster {
             stockIdCompanyRecordMap.put(companyRecord.getStockid(), companyRecord);
         }
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
-            stociIdSharesQuoteMap.put(array[idx].stockid, array[idx]);
+            stociIdSharesQuoteMap.put(array[idx].getStockid(), array[idx]);
         }
 
         // These two map size should be equal otherwise the first sort method would be wrong

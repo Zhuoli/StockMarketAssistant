@@ -5,6 +5,7 @@ import util.MarketConstant;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Entry point.
@@ -24,7 +25,6 @@ public class RunMe {
         USMarketMaster usMarketMaster = new USMarketMaster(runMe.cmd);
         ExecutorService executorService = Executors.newCachedThreadPool();
 
-
         // Run one round of query & update despite the current time
         if (runMe.cmd.hasOption(MarketConstant.DEBUG)) {
             executorService.submit(() -> {
@@ -36,6 +36,12 @@ public class RunMe {
                 chineseMarketMaster.init();
                 chineseMarketMaster.querryAndUpdate();
             });
+        }
+
+        try {
+            executorService.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException exc) {
+            exc.printStackTrace();
         }
 
         chineseMarketMaster.run();

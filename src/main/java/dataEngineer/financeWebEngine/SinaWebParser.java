@@ -10,6 +10,7 @@ import org.junit.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 
@@ -46,34 +47,36 @@ public class SinaWebParser implements IWebParser {
         // Does nothing
     }
 
-    public SharesQuote queryCompanyStock(String symbol) throws IOException{
+    public SharesQuote queryCompanyStock(String symbol) throws IOException {
         HashMap<String, String> map = this.quoteCompanyDetail(symbol);
-        SharesQuote sharesQuote = new SharesQuote();
-        sharesQuote.currentPrice = Double.parseDouble(map.get(PRICE));
-        sharesQuote.closePrice = Double.parseDouble(map.get(CLOSE_PRICE));
-        sharesQuote.highestPrice = Double.parseDouble(map.get(HIGHEST_PRICE));
-        sharesQuote.lowestPrice = Double.parseDouble(map.get(LOWEST_PRICE));
-        sharesQuote.openPrice = Double.parseDouble(map.get(OPEN_PRICE));
-
-        sharesQuote.dealVolum = map.get(DEAL_VOLUM);
-        sharesQuote.dealValue = map.get(DEAL_VALUE);
-        sharesQuote.marketCap = map.get(MARKET_CAP);
-        sharesQuote.tradingCap = map.get(TRADING_CAP);
-
-        sharesQuote.oscillation = map.get(OSCILLATION);
-        sharesQuote.exchangeRatio = map.get(EXCHANGE_RATIO);
-        sharesQuote.price2EarningRatio = Double.parseDouble(map.get(PTE));
-        sharesQuote.price2BookRatio = Double.parseDouble(map.get(PTB));
-
+        SharesQuote sharesQuote =
+                SharesQuote
+                        .builder()
+                        .currentPrice(Double.parseDouble(map.get(PRICE)))
+                        .closePrice(Double.parseDouble(map.get(CLOSE_PRICE)))
+                        .highestPrice(Double.parseDouble(map.get(HIGHEST_PRICE)))
+                        .lowestPrice(Double.parseDouble(map.get(LOWEST_PRICE)))
+                        .openPrice(Double.parseDouble(map.get(OPEN_PRICE)))
+                        .dealVolum(map.get(DEAL_VOLUM))
+                        .dealValue(map.get(DEAL_VALUE))
+                        .marketCap(map.get(MARKET_CAP))
+                        .tradingCap(map.get(TRADING_CAP))
+                        .oscillation(map.get(OSCILLATION))
+                        .exchangeRatio(map.get(EXCHANGE_RATIO))
+                        .price2EarningRatio(Double.parseDouble(map.get(PTE)))
+                        .price2BookRatio(Double.parseDouble(map.get(PTB)))
+                        .listingDate(new Date(Long.MIN_VALUE))
+                        .build();
         return sharesQuote;
     }
 
-    public HashMap<String, String> quoteCompanyDetail(String symbol) throws IOException{
+    public HashMap<String, String> quoteCompanyDetail(String symbol) throws IOException {
 
         HashMap<String, String> tableMap = new HashMap<>();
         String url = String.format(SinaFinanceBase, symbol);
         System.out.println("Quoting url: " + url);
-        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log",
+                "org.apache.commons.logging.impl.NoOpLog");
 
         java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
         java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
@@ -84,8 +87,8 @@ public class SinaWebParser implements IWebParser {
         long starttime = System.currentTimeMillis();
         final HtmlPage page = webClient.getPage(url);
         long endtime = System.currentTimeMillis();
-        System.out.println((endtime - starttime)/1000.0 + " seconds slipped to get page content.");
-
+        System.out
+                .println((endtime - starttime) / 1000.0 + " seconds slipped to get page content.");
 
         // Normalize current price
         String currentPrice = page.getElementById("price").getTextContent();
@@ -98,7 +101,11 @@ public class SinaWebParser implements IWebParser {
         String tableStr = detailTable.getTextContent();
         tableStr = tableStr.replaceAll("  ", "");
         String[] keyValuePairs = tableStr.split(" |\n");
-        keyValuePairs = Arrays.stream(keyValuePairs).filter(str -> !str.equals("")).map(str -> str.replaceAll("[：|  |]", "")).toArray(String[]::new);
+        keyValuePairs =
+                Arrays.stream(keyValuePairs)
+                        .filter(str -> !str.equals(""))
+                        .map(str -> str.replaceAll("[：|  |]", ""))
+                        .toArray(String[]::new);
 
         // Data validation
         Assert.assertTrue("Key value length should be even", keyValuePairs.length % 2 == 0);

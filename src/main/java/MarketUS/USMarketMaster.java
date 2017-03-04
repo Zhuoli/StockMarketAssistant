@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import static JooqORM.Tables.USMARKET_COMPANY;
 
 /**
- * Created by zhuolil on 2/25/17.
+ * US market master.
  */
 public class USMarketMaster {
 
@@ -30,17 +30,19 @@ public class USMarketMaster {
     SharesQuote[] companies;
     boolean isInited = false;
 
-    public USMarketMaster(CommandLine cmd){
+    public USMarketMaster(CommandLine cmd) {
         this.cmd = cmd;
     }
 
-
-    public void init(){
+    public void init() {
         Assert.assertNotNull(cmd);
         StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
-        this.companies = companyCollection.queryCompanyListUS(cmd.hasOption(MarketConstant.IS_UNDER_INTELLIJ));
+        this.companies =
+                companyCollection.queryCompanyListUS(cmd
+                        .hasOption(MarketConstant.IS_UNDER_INTELLIJ));
         this.isInited = true;
     }
+
     /**
      * Assigns the task and collects the result.
      *
@@ -49,10 +51,10 @@ public class USMarketMaster {
         try {
             System.out.println("HHa alive");
 
-
             DatabaseManager databaseManager = DatabaseManager.initializeDataManager();
             if (databaseManager == null) {
-                System.err.println("Failed to initialize database manager, please check database credential. \t Quit.");
+                System.err
+                        .println("Failed to initialize database manager, please check database credential. \t Quit.");
                 System.exit(1);
             }
 
@@ -61,7 +63,8 @@ public class USMarketMaster {
             System.out.println("Company size: " + companies.length);
             System.out.println("Querying company stock from webpage....");
 
-            ExecutorService executorService = Executors.newFixedThreadPool(MarketConstant.WEB_PARSER_SIZE);
+            ExecutorService executorService =
+                    Executors.newFixedThreadPool(MarketConstant.WEB_PARSER_SIZE);
 
             System.out.println(LocalDateTime.now().toString() + " "
                     + (companies.length - existingCompanyRecords.length)
@@ -72,7 +75,9 @@ public class USMarketMaster {
 
             // Submit company query task
             for (SharesQuote companyObject : companies) {
-                RunmeFuture runmeFuture = new RunmeFuture(executorService::submit, companyObject, new NasdaqWebParser());
+                RunmeFuture runmeFuture =
+                        new RunmeFuture(executorService::submit, companyObject,
+                                new NasdaqWebParser());
                 futureList.add(runmeFuture);
             }
 
@@ -89,23 +94,28 @@ public class USMarketMaster {
                 futureList =
                         futureList
                                 .stream()
-                                .filter(future -> !(future.startTimeMillis.isPresent() && (future.startTimeMillis.get()
-                                        + MarketConstant.TASK_MAXIMUM_TIMEOUT < System.currentTimeMillis()) && !future.result.isPresent()))
+                                .filter(future -> !(future.startTimeMillis.isPresent()
+                                        && (future.startTimeMillis.get()
+                                                + MarketConstant.TASK_MAXIMUM_TIMEOUT < System
+                                                    .currentTimeMillis()) && !future.result
+                                        .isPresent()))
                                 .collect(Collectors.toList());
 
                 System.out.println("Remain future list size: " + futureList.size());
-                DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("America/New_York"));
+                DateTime now =
+                        new DateTime(System.currentTimeMillis(),
+                                DateTimeZone.forID("America/New_York"));
 
                 for (RunmeFuture runmeFuture : futureList) {
                     if (!runmeFuture.result.isPresent())
                         continue;
                     SharesQuote sharesQuote = runmeFuture.result.get();
                     runmeFuture.isResultConsumed = true;
-                    try{
-                        databaseManager.insertOnDuplicateUpdate(USMARKET_COMPANY ,sharesQuote);
-                        System.out.println(now.toString()
-                                + ": Succeed on update company: " + sharesQuote.companyname
-                                + ";  StockID: " + sharesQuote.stockid);
+                    try {
+                        databaseManager.insertOnDuplicateUpdate(USMARKET_COMPANY, sharesQuote);
+                        System.out.println(now.toString() + ": Succeed on update company: "
+                                + sharesQuote.getCompanyname() + ";  StockID: "
+                                + sharesQuote.getStockid());
                     } catch (SQLException exc) {
                         exc.printStackTrace();
                         System.out.println(sharesQuote);
@@ -114,7 +124,7 @@ public class USMarketMaster {
                         System.out.println(sharesQuote);
                         exc.printStackTrace();
                         System.exit(1);
-                    }catch (Exception exc){
+                    } catch (Exception exc) {
                         System.err.println(sharesQuote);
                         exc.printStackTrace();
                     }
@@ -123,9 +133,11 @@ public class USMarketMaster {
                 try {
                     Thread.sleep(1000);
                 } catch (Exception exc) {
-
+                    exc.printStackTrace();
                 }
             }
+        } catch (Exception exc) {
+            exc.printStackTrace();
         } finally {
             DatabaseManager.close();
         }
@@ -135,27 +147,32 @@ public class USMarketMaster {
      *
      */
     public void run() {
-        if(!this.isInited)
+        if (!this.isInited)
             this.init();
 
         while (true) {
-            DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("America/New_York"));
+            DateTime now =
+                    new DateTime(System.currentTimeMillis(), DateTimeZone.forID("America/New_York"));
             try {
                 if (now.getDayOfWeek() > 5) {
-                    System.out.println(now.toString() + ": Nasdaq assistant: Sleep 2 hours on weekend.");
+                    System.out.println(now.toString()
+                            + ": Nasdaq assistant: Sleep 2 hours on weekend.");
                     Thread.sleep(2 * 60 * 60 * 1000);
                     continue;
                 }
                 if (now.getHourOfDay() < 8 || now.getHourOfDay() > 17) {
-                    System.out.println(now.toString() + ": Nasdaq assistant: Sleep 5 minutes off hour.");
+                    System.out.println(now.toString()
+                            + ": Nasdaq assistant: Sleep 5 minutes off hour.");
                     Thread.sleep(5 * 60 * 1000);
                     continue;
                 }
             } catch (InterruptedException exc) {
-                System.out.println("Nasdaq assistant: Interrupted exception received, gonna launch querryAndUpdate...");
+                System.out
+                        .println("Nasdaq assistant: Interrupted exception received, gonna launch querryAndUpdate...");
             }
             this.querryAndUpdate();
-            System.out.println(LocalDateTime.now().toString() + "Nasdaq assistant: One loop Job done.");
+            System.out.println(LocalDateTime.now().toString()
+                    + "Nasdaq assistant: One loop Job done.");
         }
     }
 
@@ -187,7 +204,7 @@ public class USMarketMaster {
         // companies already in databaes moved to tail.
         for (int idx = 0; idx <= nextSeenIdx; idx++) {
             // If current stock is seen in records
-            if (stockIdSet.contains(array[idx].stockid)) {
+            if (stockIdSet.contains(array[idx].getStockid())) {
                 // Move this stock to tail
                 SharesQuote tmp = array[nextSeenIdx];
                 array[nextSeenIdx] = array[idx];
@@ -205,7 +222,7 @@ public class USMarketMaster {
             stockIdCompanyRecordMap.put(companyRecord.getStockid(), companyRecord);
         }
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
-            stociIdSharesQuoteMap.put(array[idx].stockid, array[idx]);
+            stociIdSharesQuoteMap.put(array[idx].getStockid(), array[idx]);
         }
 
         // These two map size should be equal otherwise the first sort method would be wrong

@@ -19,5 +19,6 @@ CREATE TABLE `StockMarket`.`ChineseMarketCompany`
                               COMMENT '市净率 Price-to-book ratio',
    `PER`                   DOUBLE(8,2) DEFAULT 0 COMMENT '市盈率',
    last_update_date_time   DATETIME NOT NULL COMMENT '最后一次更新时间',
+   listingDate             COMMENT '上市日期'
    PRIMARY KEY(stockid)
    )

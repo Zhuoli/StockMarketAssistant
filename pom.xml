@@ -129,23 +129,23 @@
             <artifactId>jooq</artifactId>
             <version>3.8.4</version>
         </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>1.5.0</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.github.bonigarcia</groupId>-->
+            <!--<artifactId>webdrivermanager</artifactId>-->
+            <!--<version>1.5.0</version>-->
+        <!--</dependency>-->
         <!-- https://mvnrepository.com/artifact/com.codeborne/phantomjsdriver -->
-        <dependency>
-            <groupId>com.codeborne</groupId>
-            <artifactId>phantomjsdriver</artifactId>
-            <version>1.2.1</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.codeborne</groupId>-->
+            <!--<artifactId>phantomjsdriver</artifactId>-->
+            <!--<version>1.2.1</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>
             <artifactId>htmlunit</artifactId>
             <version>2.24</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
+        <!--Command Line API: https://mvnrepository.com/artifact/commons-cli/commons-cli -->
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
@@ -157,6 +157,11 @@
             <artifactId>joda-time</artifactId>
             <version>2.9.7</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok-maven-plugin -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-maven-plugin</artifactId>
+            <version>1.16.12.0</version>
+        </dependency>
     </dependencies>
 </project>

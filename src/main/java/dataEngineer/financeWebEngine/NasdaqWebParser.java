@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +23,8 @@ public class NasdaqWebParser implements IWebParser {
 
     final static String URL_BASE = "http://www.nasdaq.com/symbol";
 
-    final  static  String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
-
+    final static String USER_AGENT =
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
 
     final static String PRICE_ID = "qwidget_lastsale";
     final static String QUOTE_TABLE_ID = "quotes_content_left_InfoQuotesResults";
@@ -50,74 +51,91 @@ public class NasdaqWebParser implements IWebParser {
     public NasdaqWebParser() {
         // Does nothing
     }
-    public SharesQuote queryCompanyStock(String symbol) throws IOException{
-        SharesQuote sharesQuote = new SharesQuote();
-        sharesQuote.currentPrice = this.quoteDoubleElement(symbol, NasdaqWebParser.PRICE_ID);
+
+    public SharesQuote queryCompanyStock(String symbol) throws IOException {
+        SharesQuote sharesQuote =
+                SharesQuote
+                        .builder()
+                        .currentPrice(this.quoteDoubleElement(symbol, NasdaqWebParser.PRICE_ID))
+                        .listingDate(new Date(System.currentTimeMillis()))
+                        .build();
         List<Element> tableRows = this.getTableRows(NasdaqWebParser.URL_BASE + "/" + symbol);
-        if (tableRows.size()<10)
-            return  sharesQuote;
-        sharesQuote.oneYearTargetPrice = tableRows.get(1).child(1).text();
+        if (tableRows.size() < 10)
+            return sharesQuote;
+        sharesQuote.setOneYearTargetPrice(tableRows.get(1).child(1).text());
         String[] highestLowest = tableRows.get(2).child(1).text().split("/");
         String highestPrice = highestLowest[0].replace('$', ' ').trim();
-        sharesQuote.highestPrice = DOUBLE_PATTERN.matcher(highestPrice).find() ? Double.parseDouble(highestPrice) : 0;
+        sharesQuote.setHighestPrice(DOUBLE_PATTERN.matcher(highestPrice).find() ? Double
+                .parseDouble(highestPrice) : 0);
         String lowestPrice = highestLowest[1].replace('$', ' ').trim();
-        sharesQuote.lowestPrice = DOUBLE_PATTERN.matcher(lowestPrice).find() ? Double.parseDouble(lowestPrice) : 0;
+        sharesQuote.setLowestPrice(DOUBLE_PATTERN.matcher(lowestPrice).find() ? Double
+                .parseDouble(lowestPrice) : 0);
         String p2e = tableRows.get(8).child(1).text();
-        sharesQuote.price2EarningRatio = DOUBLE_PATTERN.matcher(p2e).find() ? Double.parseDouble(p2e) : 0 ;
-//        sharesQuote.closePrice =
-//        sharesQuote.highestPrice =
-//        sharesQuote.lowestPrice =
-//        sharesQuote.openPrice =
-//
-//        sharesQuote.dealVolum =
-//        sharesQuote.dealValue =
-//        sharesQuote.marketCap =
-//        sharesQuote.tradingCap =
-//
-//        sharesQuote.oscillation =
-//        sharesQuote.price2EarningRatio =
-//        sharesQuote.price2BookRatio =
+        sharesQuote.setPrice2EarningRatio(DOUBLE_PATTERN.matcher(p2e).find() ? Double
+                .parseDouble(p2e) : 0);
+        // sharesQuote.closePrice =
+        // sharesQuote.highestPrice =
+        // sharesQuote.lowestPrice =
+        // sharesQuote.openPrice =
+        //
+        // sharesQuote.dealVolum =
+        // sharesQuote.dealValue =
+        // sharesQuote.marketCap =
+        // sharesQuote.tradingCap =
+        //
+        // sharesQuote.oscillation =
+        // sharesQuote.price2EarningRatio =
+        // sharesQuote.price2BookRatio =
 
         return sharesQuote;
     }
 
-
     public double quoteDoubleElement(String symbol, String elementID) {
-        return Double.parseDouble(this.getElementText(NasdaqWebParser.URL_BASE + "/" + symbol, NasdaqWebParser.PRICE_ID).replaceAll("[^\\d.]+", ""));
+        return Double.parseDouble(this.getElementText(NasdaqWebParser.URL_BASE + "/" + symbol,
+                NasdaqWebParser.PRICE_ID).replaceAll("[^\\d.]+", ""));
     }
 
     public String quoteStringElement(String symbol, String elementID) {
-        return this.getElementText(NasdaqWebParser.URL_BASE + "/" + symbol, NasdaqWebParser.PRICE_ID).replaceAll("[^\\d.]+", "");
+        return this.getElementText(NasdaqWebParser.URL_BASE + "/" + symbol,
+                NasdaqWebParser.PRICE_ID).replaceAll("[^\\d.]+", "");
     }
 
-    private List<Element> getTableRows(String url){
+    private List<Element> getTableRows(String url) {
         Optional<Element> element = this.getElementById(url, NasdaqWebParser.QUOTE_TABLE_ID);
         if (!element.isPresent())
             return new LinkedList<>();
         return element.get().getElementsByTag("table").get(1).getElementsByTag("tr");
     }
 
-    private Optional<Element> getElementById(String url, String elementID){
+    private Optional<Element> getElementById(String url, String elementID) {
         try {
             if (this.dom == null) {
                 this.dom = Jsoup.connect(url).userAgent(NasdaqWebParser.USER_AGENT).get();
             }
             return Optional.ofNullable(this.dom.getElementById(elementID));
-        }
-        catch (HttpStatusException exc)
-        {
-            Logger.getGlobal().log(Level.WARNING, Strings.format("Http status exception \"{errorCode}\" from \"{url}\".").with("errorCode", exc.getStatusCode()).with("url", url).build(), exc);
+        } catch (HttpStatusException exc) {
+            Logger.getGlobal().log(
+                    Level.WARNING,
+                    Strings.format("Http status exception \"{errorCode}\" from \"{url}\".")
+                            .with("errorCode", exc.getStatusCode())
+                            .with("url", url)
+                            .build(), exc);
             return Optional.empty();
-        }
-        catch (Exception exc) {
-            Logger.getGlobal().log(Level.WARNING, Strings.format("Failed to resolve the ElementText of element ID : {id} from \"{url}\".").with("id", elementID).with("url", url).build(), exc);
+        } catch (Exception exc) {
+            Logger.getGlobal()
+                    .log(Level.WARNING,
+                            Strings.format(
+                                    "Failed to resolve the ElementText of element ID : {id} from \"{url}\".")
+                                    .with("id", elementID)
+                                    .with("url", url)
+                                    .build(), exc);
             return Optional.empty();
         }
     }
 
     public String getElementText(String url, String elementID) {
         try {
-            if(this.dom == null) {
+            if (this.dom == null) {
                 this.dom = Jsoup.connect(url).userAgent(NasdaqWebParser.USER_AGENT).get();
             }
             Element element = dom.getElementById(elementID);
@@ -125,14 +143,22 @@ public class NasdaqWebParser implements IWebParser {
                 return element.text();
             }
             return element.html();
-        }
-        catch (HttpStatusException exc)
-        {
-            Logger.getGlobal().log(Level.WARNING, Strings.format("Http status exception \"{errorCode}\" from \"{url}\".").with("errorCode", exc.getStatusCode()).with("url", url).build(), exc);
+        } catch (HttpStatusException exc) {
+            Logger.getGlobal().log(
+                    Level.WARNING,
+                    Strings.format("Http status exception \"{errorCode}\" from \"{url}\".")
+                            .with("errorCode", exc.getStatusCode())
+                            .with("url", url)
+                            .build(), exc);
             return "";
-        }
-        catch (Exception exc) {
-            Logger.getGlobal().log(Level.WARNING, Strings.format("Failed to resolve the ElementText of element ID : {id} from \"{url}\".").with("id", elementID).with("url", url).build(), exc);
+        } catch (Exception exc) {
+            Logger.getGlobal()
+                    .log(Level.WARNING,
+                            Strings.format(
+                                    "Failed to resolve the ElementText of element ID : {id} from \"{url}\".")
+                                    .with("id", elementID)
+                                    .with("url", url)
+                                    .build(), exc);
             return "";
         }
     }
