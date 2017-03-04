@@ -3,7 +3,7 @@
     <Databases id="Databases" type="xs:ID">
         <Url>earningmanagement.cqxahokpf4dx.us-west-2.rds.amazonaws.com:3306</Url>
         <User>zhuoli</User>
-        <Password>cp8482617</Password>
-        <Database>StockMarket</Database>
+        <Password></Password>
+        <Database></Database>
     </Databases>
 </EarningManagerConfigure>
