@@ -2,7 +2,7 @@
 <EarningManagerConfigure>
     <Databases id="Databases" type="xs:ID">
         <Url>earningmanagement.cqxahokpf4dx.us-west-2.rds.amazonaws.com:3306</Url>
-        <User>zhuoli</User>
+        <User></User>
         <Password></Password>
         <Database></Database>
     </Databases>
