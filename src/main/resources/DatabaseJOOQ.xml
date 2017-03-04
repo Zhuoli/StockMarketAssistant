@@ -3,8 +3,8 @@
     <!-- Configure the database connection here -->
     <jdbc>
         <driver>com.mysql.jdbc.Driver</driver>
-        <user>zhuoli</user>
-        <password>cp8482617</password>
+        <user></user>
+        <password></password>
         <url>jdbc:mysql://earningmanagement.cqxahokpf4dx.us-west-2.rds.amazonaws.com:3306/StockMarket</url>
     </jdbc>
 
