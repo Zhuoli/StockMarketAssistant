@@ -5,6 +5,7 @@ import util.MarketConstant;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,7 +24,7 @@ public class RunMe {
 
         ChineseMarketMaster chineseMarketMaster = new ChineseMarketMaster(runMe.cmd);
         USMarketMaster usMarketMaster = new USMarketMaster(runMe.cmd);
-        ExecutorService executorService = Executors.newCachedThreadPool();
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor)Executors.newCachedThreadPool();
 
         // Run one round of query & update despite the current time
         if (runMe.cmd.hasOption(MarketConstant.DEBUG)) {
@@ -38,10 +39,12 @@ public class RunMe {
             });
         }
 
-        try {
-            executorService.awaitTermination(10, TimeUnit.MINUTES);
-        } catch (InterruptedException exc) {
-            exc.printStackTrace();
+        if (executorService.getActiveCount() > 0) {
+            try {
+                executorService.awaitTermination(10, TimeUnit.MINUTES);
+            } catch (InterruptedException exc) {
+                exc.printStackTrace();
+            }
         }
 
         chineseMarketMaster.run();
