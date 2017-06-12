@@ -1,6 +1,7 @@
 package dataEngineer.financeWebEngine;
 
-import dataEngineer.SharesQuote;
+import dataEngineer.data.FinancialData;
+import dataEngineer.data.SharesQuote;
 
 import java.io.IOException;
 
@@ -9,4 +10,6 @@ import java.io.IOException;
  */
 public interface IWebParser {
     public SharesQuote queryCompanyStock(String symbol) throws IOException;
+
+    public FinancialData queryFinancialData(String symbol) throws IOException;
 }

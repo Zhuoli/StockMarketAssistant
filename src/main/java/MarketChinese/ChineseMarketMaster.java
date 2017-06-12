@@ -1,9 +1,9 @@
 package MarketChinese;
 
-import JooqORM.tables.ChineseMarketCompany;
 import JooqORM.tables.records.ChineseMarketCompanyRecord;
 import dataEngineer.DatabaseManager;
-import dataEngineer.SharesQuote;
+import dataEngineer.data.FinancialData;
+import dataEngineer.data.SharesQuote;
 import dataEngineer.StockCompanyCollection;
 import dataEngineer.financeWebEngine.XueqiuWebParser;
 import org.apache.commons.cli.CommandLine;
@@ -13,6 +13,7 @@ import org.junit.Assert;
 import util.MarketConstant;
 import util.RunmeFuture;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -21,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static JooqORM.Tables.CHINESE_MARKET_COMPANY;
+import static JooqORM.Tables.CMARKETEARNING;
 
 /**
  * Chinese stock market master.
@@ -34,6 +36,9 @@ public class ChineseMarketMaster {
         this.cmd = cmd;
     }
 
+    /**
+     * Read company list from .csv file
+     */
     public void init(){
         Assert.assertNotNull(cmd);
         StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
@@ -67,6 +72,32 @@ public class ChineseMarketMaster {
         }
     }
 
+
+    public void parseAndWriteFinancialDate() {
+        System.out.println("parseAndWriteFinancialDate");
+
+        DatabaseManager databaseManager = DatabaseManager.initializeDataManager();
+        if (databaseManager == null) {
+            System.err.println("Failed to initialize database manager, please check database credential. \t Quit.");
+            System.exit(1);
+        }
+
+        ChineseMarketCompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocksChinese();
+
+        XueqiuWebParser xueqiuWebParser = new XueqiuWebParser();
+        for(ChineseMarketCompanyRecord record : existingCompanyRecords) {
+            try {
+                FinancialData financialData = xueqiuWebParser.queryFinancialData(record.getStockid());
+                databaseManager.insertOnDuplicateUpdate(CMARKETEARNING, financialData);
+            } catch (IOException exc) {
+                exc.printStackTrace();
+            }catch (ClassNotFoundException classNotFoundException){
+                classNotFoundException.printStackTrace();
+            } catch (SQLException sqlException){
+                sqlException.printStackTrace();
+            }
+        }
+    }
 
     /**
      * Assigns the task and collects the result.

@@ -1,9 +1,13 @@
 package dataEngineer;
 
 import JooqORM.tables.ChineseMarketCompany;
+import JooqORM.tables.Cmarketearning;
 import JooqORM.tables.UsmarketCompany;
 import JooqORM.tables.records.ChineseMarketCompanyRecord;
+import JooqORM.tables.records.CmarketearningRecord;
 import JooqORM.tables.records.UsmarketCompanyRecord;
+import dataEngineer.data.FinancialData;
+import dataEngineer.data.SharesQuote;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
@@ -29,6 +33,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static JooqORM.Tables.CHINESE_MARKET_COMPANY;
+import static JooqORM.Tables.CMARKETEARNING;
 import static JooqORM.Tables.USMARKET_COMPANY;
 
 /**
@@ -206,14 +211,14 @@ public class DatabaseManager {
         DSLContext creator = this.getDBJooqCreate();
 
         // Get next batch of company
-        SharesQuote[] companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
+        List<SharesQuote> companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
 
         // Batch insert companies
-        while (companyObjects != null && companyObjects.length > 0) {
+        while (companyObjects != null && companyObjects.size() > 0) {
 
             // Convert companyobject array to JOOQ query array
             List<InsertFinalStep<ChineseMarketCompanyRecord>> list =
-                    Arrays.stream(companyObjects)
+                    Arrays.stream(companyObjects.toArray(new SharesQuote[companyObjects.size()]))
                             .map(companyObject -> creator
                                     .insertInto(CHINESE_MARKET_COMPANY,
                                             CHINESE_MARKET_COMPANY.STOCKID,
@@ -267,18 +272,51 @@ public class DatabaseManager {
         }
 
         // Get next batch of company
-        SharesQuote[] companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
+        List<SharesQuote> companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
 
         // Batch insert companies
-        while (companyObjects != null && companyObjects.length > 0) {
+        while (companyObjects != null && companyObjects.size() > 0) {
             if (table instanceof ChineseMarketCompany) {
-                this.insertToChineseMarketTable(companyObjects);
+                this.insertToChineseMarketTable(companyObjects.toArray(new SharesQuote[companyObjects.size()]));
             } else if (table instanceof UsmarketCompany) {
-                this.insertToUSMarketTable(companyObjects);
+                this.insertToUSMarketTable(companyObjects.toArray(new SharesQuote[companyObjects.size()]));
             } else {
                 throw new SQLException("Unspecified Table type.");
             }
             companyObjects = this.getNextBatch(companyObjectIterator, BATCH_SIZE);
+        }
+    }
+
+    /**
+     * Insert or update companies.
+     *
+     * @param financialDatas
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void insertOnDuplicateUpdate(Cmarketearning table, FinancialData... financialDatas)
+            throws SQLException, ClassNotFoundException {
+
+        // Data validation
+        Assert.assertNotNull(table);
+        Assert.assertNotNull(financialDatas);
+
+        Iterator<FinancialData> financialObjectIterator = Arrays.asList(financialDatas).iterator();
+
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            Logger.getGlobal().log(Level.SEVERE, "", e);
+            throw e;
+        }
+
+        // Get next batch of company
+        List<FinancialData> financialObjects = this.getNextBatch(financialObjectIterator, BATCH_SIZE);
+
+        // Batch insert companies
+        while (financialObjects != null && financialObjects.size() > 0) {
+            this.insertToChineseMarketEaringTable(financialObjects.toArray(new FinancialData[financialObjects.size()]));
+            financialObjects = this.getNextBatch(financialObjectIterator, BATCH_SIZE);
         }
     }
 
@@ -355,6 +393,23 @@ public class DatabaseManager {
                                         companyObject.getOscillation())
                                 .set(CHINESE_MARKET_COMPANY.TURNOVERRATE,
                                         companyObject.getExchangeRatio()))
+                        .collect(Collectors.toList());
+        creator.batch(list).execute();
+    }
+
+    private void insertToChineseMarketEaringTable(FinancialData[] financialDatas) throws SQLException {
+        DSLContext creator = this.getDBJooqCreate();
+        // Convert companyobject array to JOOQ query array
+        List<InsertOnDuplicateSetMoreStep<CmarketearningRecord>> list =
+                Arrays.stream(financialDatas)
+                        .map(financialObject -> creator
+                                .insertInto(CMARKETEARNING, CMARKETEARNING.STOCKID, CMARKETEARNING.GROSSMARGIN, CMARKETEARNING.REPORTURL)
+                                .values(financialObject.getStockId(),
+                                        financialObject.getGrossMargin(),
+                                        financialObject.getReporturl())
+                                .onDuplicateKeyUpdate()
+                                .set(CMARKETEARNING.GROSSMARGIN, financialObject.getGrossMargin())
+                                .set(CMARKETEARNING.REPORTURL, financialObject.getReporturl()))
                         .collect(Collectors.toList());
         creator.batch(list).execute();
     }
@@ -506,13 +561,12 @@ public class DatabaseManager {
      * @param size
      * @return
      */
-    private SharesQuote[] getNextBatch(Iterator<SharesQuote> iterator, int size) {
-        List<SharesQuote> list = new LinkedList<>();
-
+    private <T> List<T> getNextBatch(Iterator<T> iterator, int size) {
+        List<T> list = new LinkedList<>();
         int count = 0;
         while (count++ < size && iterator.hasNext()) {
             list.add(iterator.next());
         }
-        return list.toArray(new SharesQuote[0]);
+        return list;
     }
 }

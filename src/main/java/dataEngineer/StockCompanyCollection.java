@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+import dataEngineer.data.SharesQuote;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import util.MarketConstant;

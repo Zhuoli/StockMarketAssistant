@@ -1,4 +1,4 @@
-package dataEngineer;
+package dataEngineer.data;
 
 import lombok.Builder;
 import lombok.Data;

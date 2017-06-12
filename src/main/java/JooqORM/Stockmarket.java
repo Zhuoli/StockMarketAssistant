@@ -5,6 +5,7 @@ package JooqORM;
 
 
 import JooqORM.tables.ChineseMarketCompany;
+import JooqORM.tables.Cmarketearning;
 import JooqORM.tables.UsmarketCompany;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Stockmarket extends SchemaImpl {
 
-    private static final long serialVersionUID = -1803203423;
+    private static final long serialVersionUID = -739734430;
 
     /**
      * The reference instance of <code>StockMarket</code>
@@ -42,6 +43,11 @@ public class Stockmarket extends SchemaImpl {
      * The table <code>StockMarket.chinese_market_company</code>.
      */
     public final ChineseMarketCompany CHINESE_MARKET_COMPANY = JooqORM.tables.ChineseMarketCompany.CHINESE_MARKET_COMPANY;
+
+    /**
+     * The table <code>StockMarket.cmarketearning</code>.
+     */
+    public final Cmarketearning CMARKETEARNING = JooqORM.tables.Cmarketearning.CMARKETEARNING;
 
     /**
      * The table <code>StockMarket.usmarket_company</code>.
@@ -74,6 +80,7 @@ public class Stockmarket extends SchemaImpl {
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
             ChineseMarketCompany.CHINESE_MARKET_COMPANY,
+            Cmarketearning.CMARKETEARNING,
             UsmarketCompany.USMARKET_COMPANY);
     }
 }

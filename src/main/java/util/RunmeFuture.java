@@ -1,8 +1,7 @@
 package util;
 
-import dataEngineer.SharesQuote;
+import dataEngineer.data.SharesQuote;
 import dataEngineer.financeWebEngine.IWebParser;
-import dataEngineer.financeWebEngine.XueqiuWebParser;
 
 import java.io.IOException;
 import java.util.Optional;

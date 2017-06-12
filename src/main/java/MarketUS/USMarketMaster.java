@@ -2,7 +2,7 @@ package MarketUS;
 
 import JooqORM.tables.records.UsmarketCompanyRecord;
 import dataEngineer.DatabaseManager;
-import dataEngineer.SharesQuote;
+import dataEngineer.data.SharesQuote;
 import dataEngineer.StockCompanyCollection;
 import dataEngineer.financeWebEngine.NasdaqWebParser;
 import org.apache.commons.cli.CommandLine;

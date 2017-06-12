@@ -5,6 +5,7 @@ package JooqORM;
 
 
 import JooqORM.tables.ChineseMarketCompany;
+import JooqORM.tables.Cmarketearning;
 import JooqORM.tables.UsmarketCompany;
 
 import javax.annotation.Generated;
@@ -27,6 +28,11 @@ public class Tables {
      * The table <code>StockMarket.chinese_market_company</code>.
      */
     public static final ChineseMarketCompany CHINESE_MARKET_COMPANY = JooqORM.tables.ChineseMarketCompany.CHINESE_MARKET_COMPANY;
+
+    /**
+     * The table <code>StockMarket.cmarketearning</code>.
+     */
+    public static final Cmarketearning CMARKETEARNING = JooqORM.tables.Cmarketearning.CMARKETEARNING;
 
     /**
      * The table <code>StockMarket.usmarket_company</code>.

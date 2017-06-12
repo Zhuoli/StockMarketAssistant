@@ -1,17 +1,29 @@
 package dataEngineer.financeWebEngine;
 
-import dataEngineer.SharesQuote;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.html.HtmlTable;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLElement;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import dataEngineer.data.FinancialData;
+import dataEngineer.data.SharesQuote;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Assert;
+import org.openqa.selenium.htmlunit.HtmlUnitWebElement;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Created by zhuolil on 2/2/17.
@@ -22,6 +34,15 @@ public class XueqiuWebParser implements IWebParser {
 
     final static String USER_AGENT =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
+
+
+    final static String DOUBLE_REGEX_STRING = "^\\d+(\\.\\d+)*$";
+    final static Pattern DOUBLE_PATTERN = Pattern.compile(DOUBLE_REGEX_STRING);
+
+    public XueqiuWebParser() {
+        // Does nothing
+    }
+
 
     final static String PRICE = "price";
 
@@ -39,13 +60,7 @@ public class XueqiuWebParser implements IWebParser {
     final static String PTE = "市盈率(静)/(动)";
     final static String PTB = "市净率(动)";
 
-    final static String DOUBLE_REGEX_STRING = "^\\d+(\\.\\d+)*$";
-    final static Pattern DOUBLE_PATTERN = Pattern.compile(DOUBLE_REGEX_STRING);
-
-    public XueqiuWebParser() {
-        // Does nothing
-    }
-
+    @Override
     public SharesQuote queryCompanyStock(String symbol) throws IOException {
         Map<String, String> map = this.queryTableDetail(symbol);
         SharesQuote sharesQuote =
@@ -73,6 +88,25 @@ public class XueqiuWebParser implements IWebParser {
                         .listingDate(new Date(System.currentTimeMillis()))
                         .build();
         return sharesQuote;
+    }
+
+    final static String GROSS_MARGIN = "销售毛利率(%)";
+    @Override
+    public FinancialData queryFinancialData(String symbol) throws IOException {
+        String url = String.format("%s/%s/ZYCWZB",XueqiuWebParser.URL_BASE, symbol);
+        Map<String, String[]> financialMap = this.parseFinancialPage(url);
+
+        // Retrieve gross margin
+        String grossMarginStr = financialMap.getOrDefault(GROSS_MARGIN, new String[]{"-65535"})[0];
+        double grossMargin = DOUBLE_PATTERN.matcher(grossMarginStr).find() ? Double.parseDouble(grossMarginStr) : 0;
+        FinancialData financialData =
+                FinancialData
+                        .builder()
+                        .grossMargin(grossMargin)
+                        .stockId(symbol)
+                        .reporturl(url)
+                        .build();
+        return  financialData;
     }
 
     private Map<String, String> queryTableDetail(String stocId) {
@@ -119,6 +153,32 @@ public class XueqiuWebParser implements IWebParser {
             exc.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * e.g: "https://xueqiu.com/S/SH600690/ZYCWZB";
+     **/
+    public Map<String, String[]> parseFinancialPage(String url){
+        HashMap<String, String[]> map = new HashMap<>();
+
+        WebDriver driver = new HtmlUnitDriver(BrowserVersion.CHROME, true);
+
+        // Navigate to Google
+        driver.get(url);
+        List<WebElement> elements = driver.findElements(By.tagName("table"));
+
+        if (elements.size()==0)
+            return  null;
+
+        WebElement table = elements.get(0);
+        List<WebElement> allRows = table.findElements(By.xpath(".//*[local-name(.)='tr']"));
+        for(WebElement row : allRows){
+            List<WebElement> cols = row.findElements(By.xpath(".//*[local-name(.)='td']"));
+            String rowName = cols.get(0).getText();
+            String[] values = cols.subList(1, cols.size()).stream().map(col -> col.getText()).toArray(String[]::new);
+            map.put(rowName, values);
+        }
+        return map;
     }
 
 }

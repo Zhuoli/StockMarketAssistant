@@ -5,8 +5,10 @@ package JooqORM;
 
 
 import JooqORM.tables.ChineseMarketCompany;
+import JooqORM.tables.Cmarketearning;
 import JooqORM.tables.UsmarketCompany;
 import JooqORM.tables.records.ChineseMarketCompanyRecord;
+import JooqORM.tables.records.CmarketearningRecord;
 import JooqORM.tables.records.UsmarketCompanyRecord;
 
 import javax.annotation.Generated;
@@ -39,6 +41,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<ChineseMarketCompanyRecord> KEY_CHINESE_MARKET_COMPANY_PRIMARY = UniqueKeys0.KEY_CHINESE_MARKET_COMPANY_PRIMARY;
+    public static final UniqueKey<CmarketearningRecord> KEY_CMARKETEARNING_PRIMARY = UniqueKeys0.KEY_CMARKETEARNING_PRIMARY;
     public static final UniqueKey<UsmarketCompanyRecord> KEY_USMARKET_COMPANY_PRIMARY = UniqueKeys0.KEY_USMARKET_COMPANY_PRIMARY;
 
     // -------------------------------------------------------------------------
@@ -52,6 +55,7 @@ public class Keys {
 
     private static class UniqueKeys0 extends AbstractKeys {
         public static final UniqueKey<ChineseMarketCompanyRecord> KEY_CHINESE_MARKET_COMPANY_PRIMARY = createUniqueKey(ChineseMarketCompany.CHINESE_MARKET_COMPANY, "KEY_chinese_market_company_PRIMARY", ChineseMarketCompany.CHINESE_MARKET_COMPANY.STOCKID);
+        public static final UniqueKey<CmarketearningRecord> KEY_CMARKETEARNING_PRIMARY = createUniqueKey(Cmarketearning.CMARKETEARNING, "KEY_cmarketearning_PRIMARY", Cmarketearning.CMARKETEARNING.STOCKID);
         public static final UniqueKey<UsmarketCompanyRecord> KEY_USMARKET_COMPANY_PRIMARY = createUniqueKey(UsmarketCompany.USMARKET_COMPANY, "KEY_usmarket_company_PRIMARY", UsmarketCompany.USMARKET_COMPANY.STOCKID);
     }
 }

@@ -1,7 +1,8 @@
 package dataEngineer.financeWebEngine;
 
 import com.joanzapata.utils.Strings;
-import dataEngineer.SharesQuote;
+import dataEngineer.data.FinancialData;
+import dataEngineer.data.SharesQuote;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -88,6 +89,11 @@ public class NasdaqWebParser implements IWebParser {
         // sharesQuote.price2BookRatio =
 
         return sharesQuote;
+    }
+
+    @Override
+    public FinancialData queryFinancialData(String symbol) throws IOException {
+        throw new IOException("Method not implemented yet.");
     }
 
     public double quoteDoubleElement(String symbol, String elementID) {

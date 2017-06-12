@@ -1,8 +1,11 @@
 import MarketChinese.ChineseMarketMaster;
 import MarketUS.USMarketMaster;
+import dataEngineer.data.FinancialData;
+import dataEngineer.financeWebEngine.XueqiuWebParser;
 import org.apache.commons.cli.*;
 import util.MarketConstant;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -31,6 +34,11 @@ public class RunMe {
             executorService.submit(() -> {
                 usMarketMaster.init();
                 usMarketMaster.querryAndUpdate();
+            });
+
+            // Parse and write earning report financial data
+            executorService.submit(() -> {
+                chineseMarketMaster.parseAndWriteFinancialDate();
             });
 
             executorService.submit(() -> {

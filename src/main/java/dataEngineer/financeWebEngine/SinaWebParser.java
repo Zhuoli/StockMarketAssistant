@@ -3,7 +3,8 @@ package dataEngineer.financeWebEngine;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import dataEngineer.SharesQuote;
+import dataEngineer.data.FinancialData;
+import dataEngineer.data.SharesQuote;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 
@@ -68,6 +69,12 @@ public class SinaWebParser implements IWebParser {
                         .listingDate(new Date(Long.MIN_VALUE))
                         .build();
         return sharesQuote;
+    }
+
+    @Override
+    public FinancialData queryFinancialData(String symbol) throws IOException {
+        throw new IOException("Method not implemented yet.");
+
     }
 
     public HashMap<String, String> quoteCompanyDetail(String symbol) throws IOException {
