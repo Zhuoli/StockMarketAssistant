@@ -86,7 +86,7 @@ public final class StockCompanyCollection {
                 SharesQuote companyObject =
                         SharesQuote
                                 .builder()
-                                .stockid(line.get(0).trim())
+                                .stockId(line.get(0).trim())
                                 .companyname(line.get(1).trim())
                                 .build();
                 companyObjectList.add(companyObject);
@@ -132,7 +132,7 @@ public final class StockCompanyCollection {
                 SharesQuote companyObject =
                         SharesQuote
                                 .builder()
-                                .stockid("sh" + line.get(2).trim())
+                                .stockId("sh" + line.get(2).trim())
                                 .companyname(line.get(3).trim())
                                 .build();
                 companyObjectList.add(companyObject);
@@ -173,7 +173,7 @@ public final class StockCompanyCollection {
                         SharesQuote
                                 .builder()
                                 .companyname(line.get(1))
-                                .stockid(
+                                .stockId(
                                         "sz"
                                                 + StringUtils.repeat("0",
                                                         Math.max(0, 6 - line.get(5).length()))

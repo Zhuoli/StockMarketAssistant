@@ -8,12 +8,9 @@ import java.util.Date;
 /**
  * Represents an CompanyObject's Shares Quote.
  */
-
-@Builder
 @Data
-public class SharesQuote {
+public class SharesQuote extends WebParserData{
 
-    private String stockid;
     private String companyname;
 
     private double currentPrice;
@@ -47,4 +44,30 @@ public class SharesQuote {
     private String oneYearTargetPrice;
 
     private Date listingDate;
+
+    @Builder
+    private SharesQuote(String stockId, String companyname, double currentPrice, double openPrice, double highestPrice,
+                        double lowestPrice, double closePrice, String dealVolum, String dealValue, String marketCap,
+                        String tradingCap, String oscillation, String exchangeRatio, double price2EarningRatio,
+                        double price2BookRatio, String officialWebUrl, String oneYearTargetPrice, Date listingDate){
+        super(stockId);
+        this.companyname = companyname;
+        this.currentPrice = currentPrice;
+        this.openPrice = openPrice;
+        this.highestPrice = highestPrice;
+        this.lowestPrice = lowestPrice;
+        this.closePrice = closePrice;
+        this.dealVolum = dealVolum;
+        this.dealValue = dealValue;
+        this.marketCap = marketCap;
+        this.tradingCap = tradingCap;
+        this.oscillation = oscillation;
+        this.exchangeRatio = exchangeRatio;
+        this.price2EarningRatio = price2EarningRatio;
+        this.price2BookRatio = price2BookRatio;
+        this.officialWebUrl = officialWebUrl;
+        this.oneYearTargetPrice = oneYearTargetPrice;
+        this.listingDate = listingDate;
+    }
+
 }

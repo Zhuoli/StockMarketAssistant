@@ -22,3 +22,10 @@ CREATE TABLE `StockMarket`.`ChineseMarketCompany`
    listingDate             COMMENT '上市日期'
    PRIMARY KEY(stockid)
    )
+
+CREATE TABLE `cmarketearning` (
+  `stockid` varchar(255) NOT NULL COMMENT '股票ID',
+  `grossmargin` double DEFAULT NULL COMMENT '毛利率',
+  `reporturl` varchar(255) NOT NULL COMMENT '主要财务指标',
+  PRIMARY KEY (`stockid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8INE=InnoDB DEFAULT CHARSET=utf8

@@ -34,7 +34,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Cmarketearning extends TableImpl<CmarketearningRecord> {
 
-    private static final long serialVersionUID = -1505476582;
+    private static final long serialVersionUID = -1046494991;
 
     /**
      * The reference instance of <code>StockMarket.cmarketearning</code>
@@ -63,6 +63,11 @@ public class Cmarketearning extends TableImpl<CmarketearningRecord> {
      * The column <code>StockMarket.cmarketearning.reporturl</code>. 主要财务指标
      */
     public final TableField<CmarketearningRecord, String> REPORTURL = createField("reporturl", org.jooq.impl.SQLDataType.VARCHAR.length(255).nullable(false), this, "主要财务指标");
+
+    /**
+     * The column <code>StockMarket.cmarketearning.roe</code>. 净资产收益率
+     */
+    public final TableField<CmarketearningRecord, Double> ROE = createField("roe", org.jooq.impl.SQLDataType.DOUBLE.nullable(false), this, "净资产收益率");
 
     /**
      * Create a <code>StockMarket.cmarketearning</code> table reference
