@@ -26,8 +26,8 @@ public class RunmeFuture {
             startTimeMillis = Optional.of(System.currentTimeMillis());
 
             try {
-                SharesQuote quote = webParser.queryCompanyStock(companyObject.getStockid());
-                quote.setStockid(companyObject.getStockid());
+                SharesQuote quote = webParser.queryCompanyStock(companyObject.getStockId());
+                quote.setStockId(companyObject.getStockId());
                 quote.setCompanyname(companyObject.getCompanyname());
                 quote.setOfficialWebUrl(companyObject.getOfficialWebUrl());
                 this.result = Optional.of(quote);

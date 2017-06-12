@@ -1,8 +1,6 @@
 package dataEngineer.financeWebEngine;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.html.HtmlTable;
-import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -14,7 +12,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Assert;
-import org.openqa.selenium.htmlunit.HtmlUnitWebElement;
 
 import java.io.IOException;
 import java.util.Date;
@@ -104,13 +101,14 @@ public class XueqiuWebParser implements IWebParser {
                         .builder()
                         .grossMargin(grossMargin)
                         .stockId(symbol)
-                        .reporturl(url)
+                        .reportUrl(url)
                         .build();
         return  financialData;
     }
 
     private Map<String, String> queryTableDetail(String stocId) {
         String reportUrl = XueqiuWebParser.URL_BASE + "/" + stocId;
+        HashMap<String, String> map = new HashMap<>();
         try {
 
             // Parse html to get target element
@@ -134,7 +132,6 @@ public class XueqiuWebParser implements IWebParser {
 
             String[] keyValuePairs = tableValue.split(" ");
 
-            HashMap<String, String> map = new HashMap<>();
             map.put(PRICE, currentPrice);
             for (String keyValue : keyValuePairs) {
                 String[] keyValuePair = keyValue.split("：");
@@ -152,7 +149,7 @@ public class XueqiuWebParser implements IWebParser {
             System.err.println("Error while processing url: " + reportUrl);
             exc.printStackTrace();
         }
-        return null;
+        return map;
     }
 
     /**
@@ -168,7 +165,7 @@ public class XueqiuWebParser implements IWebParser {
         List<WebElement> elements = driver.findElements(By.tagName("table"));
 
         if (elements.size()==0)
-            return  null;
+            return  map;
 
         WebElement table = elements.get(0);
         List<WebElement> allRows = table.findElements(By.xpath(".//*[local-name(.)='tr']"));

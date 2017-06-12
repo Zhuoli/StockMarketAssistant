@@ -4,6 +4,7 @@ import JooqORM.tables.records.UsmarketCompanyRecord;
 import dataEngineer.DatabaseManager;
 import dataEngineer.data.SharesQuote;
 import dataEngineer.StockCompanyCollection;
+import dataEngineer.data.WebParserData;
 import dataEngineer.financeWebEngine.NasdaqWebParser;
 import org.apache.commons.cli.CommandLine;
 import org.joda.time.DateTime;
@@ -115,7 +116,7 @@ public class USMarketMaster {
                         databaseManager.insertOnDuplicateUpdate(USMARKET_COMPANY, sharesQuote);
                         System.out.println(now.toString() + ": Succeed on update company: "
                                 + sharesQuote.getCompanyname() + ";  StockID: "
-                                + sharesQuote.getStockid());
+                                + sharesQuote.getStockId());
                     } catch (SQLException exc) {
                         exc.printStackTrace();
                         System.out.println(sharesQuote);
@@ -147,6 +148,8 @@ public class USMarketMaster {
      *
      */
     public void run() {
+        System.out.println("Now in US market Master running.");
+
         if (!this.isInited)
             this.init();
 
@@ -198,21 +201,10 @@ public class USMarketMaster {
                         .map(record -> record.getStockid())
                         .collect(Collectors.toSet());
 
-        int nextSeenIdx = array.length - 1;
 
         // 1: Sort company array so that those unsearched company moved to head of array and those
         // companies already in databaes moved to tail.
-        for (int idx = 0; idx <= nextSeenIdx; idx++) {
-            // If current stock is seen in records
-            if (stockIdSet.contains(array[idx].getStockid())) {
-                // Move this stock to tail
-                SharesQuote tmp = array[nextSeenIdx];
-                array[nextSeenIdx] = array[idx];
-                array[idx] = tmp;
-                nextSeenIdx--;
-                idx--;
-            }
-        }
+        int nextSeenIdx = WebParserData.moveUnsearchedDataAhead(stockIdSet, array);
 
         // 2: Sort companies which is in database by lastUpdateDatetime order, e.g: the latest
         // updated company move to tail.
@@ -222,7 +214,7 @@ public class USMarketMaster {
             stockIdCompanyRecordMap.put(companyRecord.getStockid(), companyRecord);
         }
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
-            stociIdSharesQuoteMap.put(array[idx].getStockid(), array[idx]);
+            stociIdSharesQuoteMap.put(array[idx].getStockId(), array[idx]);
         }
 
         // These two map size should be equal otherwise the first sort method would be wrong

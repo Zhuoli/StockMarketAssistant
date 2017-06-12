@@ -227,7 +227,7 @@ public class DatabaseManager {
                                             CHINESE_MARKET_COMPANY.LAST_UPDATE_DATE_TIME,
                                             CHINESE_MARKET_COMPANY.PBR, CHINESE_MARKET_COMPANY.PER,
                                             CHINESE_MARKET_COMPANY.CURRENTPRICE)
-                                    .values(companyObject.getStockid(),
+                                    .values(companyObject.getStockId(),
                                             companyObject.getCompanyname(),
                                             new Timestamp(System.currentTimeMillis()),
                                             new Timestamp(System.currentTimeMillis()),
@@ -350,7 +350,7 @@ public class DatabaseManager {
                                         CHINESE_MARKET_COMPANY.OSCILLATION,
                                         CHINESE_MARKET_COMPANY.TURNOVERRATE,
                                         CHINESE_MARKET_COMPANY.LISTING_DATE)
-                                .values(companyObject.getStockid(), companyObject.getCompanyname(),
+                                .values(companyObject.getStockId(), companyObject.getCompanyname(),
                                         companyObject.getCurrentPrice(),
                                         new Timestamp(System.currentTimeMillis()),
                                         companyObject.getHighestPrice(),
@@ -443,7 +443,7 @@ public class DatabaseManager {
                                         USMARKET_COMPANY.OSCILLATION,
                                         USMARKET_COMPANY.TURNOVERRATE,
                                         USMARKET_COMPANY.LISTING_DATE)
-                                .values(companyObject.getStockid(), companyObject.getCompanyname(),
+                                .values(companyObject.getStockId(), companyObject.getCompanyname(),
                                         companyObject.getCurrentPrice(),
                                         new Timestamp(System.currentTimeMillis()),
                                         companyObject.getHighestPrice(),
@@ -488,50 +488,12 @@ public class DatabaseManager {
      * 
      * @return Stock Id set.
      */
-    public Set<String> getExistingStockIDs() {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-
-            DSLContext creator = this.getDBJooqCreate();
-            Result<Record1<String>> r =
-                    creator.select(CHINESE_MARKET_COMPANY.STOCKID)
-                            .from(CHINESE_MARKET_COMPANY)
-                            .fetch();
-            r.toArray(new Record[0])[0].get(CHINESE_MARKET_COMPANY
-                    .field(CHINESE_MARKET_COMPANY.STOCKID));
-
-            return Arrays
-                    .stream(r.toArray(new Record[0]))
-                    .map(record -> record.get(CHINESE_MARKET_COMPANY
-                            .field(CHINESE_MARKET_COMPANY.STOCKID)))
-                    .collect(Collectors.toSet());
-        } catch (ClassNotFoundException e) {
-            Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
-        } catch (SQLException e) {
-            Logger.getGlobal().log(Level.SEVERE, "SQL Exception", e);
-        }
-        return null;
+    public ChineseMarketCompanyRecord[] getExistingStocksChinese() {
+        return this.getExistingItemsInDatabase(new ChineseMarketCompanyRecord[0], CHINESE_MARKET_COMPANY);
     }
 
-    /**
-     * Gets existing stock IDs from Database, returns null if caught exception.
-     * 
-     * @return Stock Id set.
-     */
-    public ChineseMarketCompanyRecord[] getExistingStocksChinese() {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-
-            DSLContext creator = this.getDBJooqCreate();
-            Result<ChineseMarketCompanyRecord> records =
-                    creator.selectFrom(CHINESE_MARKET_COMPANY).fetch();
-            return records.toArray(new ChineseMarketCompanyRecord[0]);
-        } catch (ClassNotFoundException e) {
-            Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
-        } catch (SQLException e) {
-            Logger.getGlobal().log(Level.SEVERE, "SQL Exception", e);
-        }
-        return null;
+    public CmarketearningRecord[] getExistingCmarketEarning(){
+        return this.getExistingItemsInDatabase(new CmarketearningRecord[0], CMARKETEARNING);
     }
 
     /**
@@ -540,18 +502,30 @@ public class DatabaseManager {
      * @return Stock Id set.
      */
     public UsmarketCompanyRecord[] getExistingStocksUS() {
+        return this.getExistingItemsInDatabase(new UsmarketCompanyRecord[0], USMARKET_COMPANY);
+    }
+
+    /**
+     * Retrieve existing items from database in the given table instance.
+     * @param arr : return array type
+     * @param tableInstance
+     * @param <T>
+     * @return
+     */
+    private <T extends Record> T[] getExistingItemsInDatabase(T[] arr, TableImpl tableInstance){
         try {
             Class.forName("com.mysql.jdbc.Driver");
 
             DSLContext creator = this.getDBJooqCreate();
-            Result<UsmarketCompanyRecord> records = creator.selectFrom(USMARKET_COMPANY).fetch();
-            return records.toArray(new UsmarketCompanyRecord[0]);
+            Result<T> records =
+                    creator.selectFrom(tableInstance).fetch();
+            return records.toArray(arr);
         } catch (ClassNotFoundException e) {
             Logger.getGlobal().log(Level.SEVERE, "DB driver not found", e);
         } catch (SQLException e) {
             Logger.getGlobal().log(Level.SEVERE, "SQL Exception", e);
         }
-        return null;
+        return arr;
     }
 
     /**
