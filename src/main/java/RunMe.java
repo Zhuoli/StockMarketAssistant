@@ -36,15 +36,19 @@ public class RunMe {
                 usMarketMaster.querryAndUpdate();
             });
 
+            executorService.submit(() -> {
+                chineseMarketMaster.init();
+                chineseMarketMaster.querryAndUpdate();
+            });
+        }
+
+        if (runMe.cmd.hasOption(MarketConstant.FINANCIAL)){
+
             // Parse and write earning report financial data
             executorService.submit(() -> {
                 chineseMarketMaster.parseAndWriteFinancialDate();
             });
 
-            executorService.submit(() -> {
-                chineseMarketMaster.init();
-                chineseMarketMaster.querryAndUpdate();
-            });
         }
 
         if (executorService.getActiveCount() > 0) {
@@ -55,6 +59,7 @@ public class RunMe {
             }
         }
 
+        // Start the periodical stock parse
         chineseMarketMaster.run();
         usMarketMaster.run();
     }
@@ -71,6 +76,7 @@ public class RunMe {
         // add t option
         options.addOption(MarketConstant.IS_UNDER_INTELLIJ, false, "Is running under IDE or not");
         options.addOption(MarketConstant.DEBUG, false, "Is running under Debug model or not");
+        options.addOption(MarketConstant.FINANCIAL, false, "Should parse financial report or not");
         CommandLineParser parser = new DefaultParser();
 
         try {

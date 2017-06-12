@@ -7,6 +7,7 @@ public class MarketConstant {
 
     public final static String IS_UNDER_INTELLIJ = "i";
     public final static String DEBUG = "d";
+    public final static String FINANCIAL = "f";
     public final static int WEB_PARSER_SIZE = 2;
     public final static long TASK_MAXIMUM_TIMEOUT = 3 * 60 * 1000;
 
