@@ -88,25 +88,20 @@ public class XueqiuWebParser implements IWebParser {
     }
 
     final static String GROSS_MARGIN = "销售毛利率(%)";
-    final static String ROE = "净资产收益率(加权)(%)";
-    final static String[] DEFAULT_STRING_ARR = new String[]{"-65535"};
     @Override
     public FinancialData queryFinancialData(String symbol) throws IOException {
         String url = String.format("%s/%s/ZYCWZB",XueqiuWebParser.URL_BASE, symbol);
         Map<String, String[]> financialMap = this.parseFinancialPage(url);
 
         // Retrieve gross margin
-        String grossMarginStr = financialMap.getOrDefault(GROSS_MARGIN, DEFAULT_STRING_ARR)[0];
+        String grossMarginStr = financialMap.getOrDefault(GROSS_MARGIN, new String[]{"-65535"})[0];
         double grossMargin = DOUBLE_PATTERN.matcher(grossMarginStr).find() ? Double.parseDouble(grossMarginStr) : 0;
-        String roeStr = financialMap.getOrDefault(ROE, DEFAULT_STRING_ARR)[0];
-        double roe = DOUBLE_PATTERN.matcher(roeStr).find() ? Double.parseDouble(roeStr) : 0;
         FinancialData financialData =
                 FinancialData
                         .builder()
                         .grossMargin(grossMargin)
                         .stockId(symbol)
                         .reportUrl(url)
-                        .roe(roe)
                         .build();
         return  financialData;
     }
