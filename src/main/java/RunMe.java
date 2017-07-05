@@ -37,17 +37,17 @@ public class RunMe {
                 usMarketMaster.querryAndUpdate();
             });
 
-//            executorService.submit(() -> {
-//                chineseMarketMaster.init();
-//                chineseMarketMaster.querryAndUpdate();
-//            });
+            executorService.submit(() -> {
+                chineseMarketMaster.init();
+                chineseMarketMaster.querryAndUpdate();
+            });
         }
 
         if (runMe.cmd.hasOption(MarketConstant.FINANCIAL)){
 
             // Parse and write earning report financial data
             executorService.submit(() -> {
-//                chineseMarketMaster.parseAndWriteFinancialDate();
+                chineseMarketMaster.parseAndWriteFinancialDate();
             });
 
         }
@@ -61,7 +61,7 @@ public class RunMe {
         }
 
         // Start the periodical stock parse
-//        chineseMarketMaster.run();
+        chineseMarketMaster.run();
         usMarketMaster.run();
     }
 
