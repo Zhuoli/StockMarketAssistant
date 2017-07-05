@@ -10,6 +10,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import org.junit.Assert;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,6 +58,9 @@ public class MongoDBConnector {
         MongoCollection chineseStockTable = this.mongoDatabase.getCollection(tableName);
         Gson gson = new Gson();
         for(SharesQuote record : records){
+            Assert.assertNotNull("stock Id should not be null", record.get_id());
+            Assert.assertNotNull("company name should not be null", record.getCompanyname());
+
             String json = gson.toJson(record);
             Document doc = Document.parse(json);
             try {

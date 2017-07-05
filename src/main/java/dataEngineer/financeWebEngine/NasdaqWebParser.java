@@ -57,6 +57,7 @@ public class NasdaqWebParser implements IWebParser {
         SharesQuote sharesQuote =
                 SharesQuote
                         .builder()
+                        ._id(symbol)
                         .currentPrice(this.quoteDoubleElement(symbol, NasdaqWebParser.PRICE_ID))
                         .listingDate(new Date(System.currentTimeMillis()))
                         .build();
@@ -74,20 +75,6 @@ public class NasdaqWebParser implements IWebParser {
         String p2e = tableRows.get(8).child(1).text();
         sharesQuote.setPrice2EarningRatio(DOUBLE_PATTERN.matcher(p2e).find() ? Double
                 .parseDouble(p2e) : 0);
-        // sharesQuote.closePrice =
-        // sharesQuote.highestPrice =
-        // sharesQuote.lowestPrice =
-        // sharesQuote.openPrice =
-        //
-        // sharesQuote.dealVolum =
-        // sharesQuote.dealValue =
-        // sharesQuote.marketCap =
-        // sharesQuote.tradingCap =
-        //
-        // sharesQuote.oscillation =
-        // sharesQuote.price2EarningRatio =
-        // sharesQuote.price2BookRatio =
-
         return sharesQuote;
     }
 

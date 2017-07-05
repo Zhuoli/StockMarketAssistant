@@ -32,22 +32,22 @@ public class RunMe {
 
         // Run one round of query & update despite the current time
         if (runMe.cmd.hasOption(MarketConstant.DEBUG)) {
-//            executorService.submit(() -> {
-//                usMarketMaster.init();
-//                usMarketMaster.querryAndUpdate();
-//            });
-
             executorService.submit(() -> {
-                chineseMarketMaster.init();
-                chineseMarketMaster.querryAndUpdate();
+                usMarketMaster.init();
+                usMarketMaster.querryAndUpdate();
             });
+
+//            executorService.submit(() -> {
+//                chineseMarketMaster.init();
+//                chineseMarketMaster.querryAndUpdate();
+//            });
         }
 
         if (runMe.cmd.hasOption(MarketConstant.FINANCIAL)){
 
             // Parse and write earning report financial data
             executorService.submit(() -> {
-                chineseMarketMaster.parseAndWriteFinancialDate();
+//                chineseMarketMaster.parseAndWriteFinancialDate();
             });
 
         }
@@ -61,8 +61,8 @@ public class RunMe {
         }
 
         // Start the periodical stock parse
-        chineseMarketMaster.run();
-//        usMarketMaster.run();
+//        chineseMarketMaster.run();
+        usMarketMaster.run();
     }
 
     /**
