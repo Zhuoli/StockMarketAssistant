@@ -2,14 +2,18 @@ package dataEngineer.data;
 
 import lombok.Builder;
 import lombok.Data;
+import org.junit.Assert;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Represents an CompanyObject's Shares Quote.
  */
 @Data
-public class SharesQuote extends WebParserData{
+@Builder
+public class SharesQuote{
+    private String _id;
 
     private String companyname;
 
@@ -45,29 +49,30 @@ public class SharesQuote extends WebParserData{
 
     private Date listingDate;
 
-    @Builder
-    private SharesQuote(String stockId, String companyname, double currentPrice, double openPrice, double highestPrice,
-                        double lowestPrice, double closePrice, String dealVolum, String dealValue, String marketCap,
-                        String tradingCap, String oscillation, String exchangeRatio, double price2EarningRatio,
-                        double price2BookRatio, String officialWebUrl, String oneYearTargetPrice, Date listingDate){
-        super(stockId);
-        this.companyname = companyname;
-        this.currentPrice = currentPrice;
-        this.openPrice = openPrice;
-        this.highestPrice = highestPrice;
-        this.lowestPrice = lowestPrice;
-        this.closePrice = closePrice;
-        this.dealVolum = dealVolum;
-        this.dealValue = dealValue;
-        this.marketCap = marketCap;
-        this.tradingCap = tradingCap;
-        this.oscillation = oscillation;
-        this.exchangeRatio = exchangeRatio;
-        this.price2EarningRatio = price2EarningRatio;
-        this.price2BookRatio = price2BookRatio;
-        this.officialWebUrl = officialWebUrl;
-        this.oneYearTargetPrice = oneYearTargetPrice;
-        this.listingDate = listingDate;
-    }
+    private Date lastUpdatedTime;
 
+    private FinancialData financialData;
+    public static int moveUnsearchedDataAhead(Set<String> updatedStockIdSet, SharesQuote[] array){
+
+        Assert.assertNotNull(updatedStockIdSet);
+        Assert.assertNotNull(array);
+
+        int nextSeenIdx = array.length - 1;
+
+        // Sort company array so that those unsearched company moved to head of array and those
+        // companies already in databaes moved to tail.
+        for (int idx = 0; idx <= nextSeenIdx; idx++) {
+            // If current stock is seen in records
+            if (updatedStockIdSet.contains(array[idx].get_id())) {
+                // Move this stock to tail
+                SharesQuote tmp = array[nextSeenIdx];
+                array[nextSeenIdx] = array[idx];
+                array[idx] = tmp;
+                nextSeenIdx--;
+                idx--;
+            }
+        }
+
+        return nextSeenIdx;
+    }
 }

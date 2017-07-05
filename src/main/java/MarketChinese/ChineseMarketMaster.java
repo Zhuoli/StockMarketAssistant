@@ -1,13 +1,10 @@
 package MarketChinese;
-
-import JooqORM.tables.records.ChineseMarketCompanyRecord;
-import JooqORM.tables.records.CmarketearningRecord;
 import dataEngineer.DatabaseManager;
 import dataEngineer.data.FinancialData;
 import dataEngineer.data.SharesQuote;
 import dataEngineer.StockCompanyCollection;
-import dataEngineer.data.WebParserData;
 import dataEngineer.financeWebEngine.XueqiuWebParser;
+import mongoDb.MongoDBConnector;
 import org.apache.commons.cli.CommandLine;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -16,15 +13,11 @@ import util.MarketConstant;
 import util.RunmeFuture;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
-import static JooqORM.Tables.CHINESE_MARKET_COMPANY;
-import static JooqORM.Tables.CMARKETEARNING;
 
 /**
  * Chinese stock market master.
@@ -87,26 +80,23 @@ public class ChineseMarketMaster {
         }
 
         // Retrieve existing records in database and sort the toBeUpdated company array
-        String[] toBeUpdatedCompanyIds =
-                Arrays.stream(databaseManager.getExistingStocksChinese()).map(record -> record.getStockid()).toArray(String[]::new);
+        SharesQuote[] chineseStockMarkets = databaseManager.RetrieveCollection(MongoDBConnector.CHINESE_TABLE).toArray(new SharesQuote[0]);
         Set<String> existingCmarketearningRecordSet =
-                Arrays.stream(databaseManager.getExistingCmarketEarning()).map(record -> record.getStockid()).collect(Collectors.toSet());
-        WebParserData.moveUnsearchedItemAhead(existingCmarketearningRecordSet, toBeUpdatedCompanyIds);
+                Arrays.stream(chineseStockMarkets)
+                        .filter(sharesQuote -> sharesQuote.getFinancialData() != null)
+                        .map(sharesQuote -> sharesQuote.get_id())
+                        .collect(Collectors.toSet());
+        SharesQuote.moveUnsearchedDataAhead(existingCmarketearningRecordSet, chineseStockMarkets);
 
         XueqiuWebParser xueqiuWebParser = new XueqiuWebParser();
-        for(String stockId : toBeUpdatedCompanyIds) {
+        for(SharesQuote sharesQuote : chineseStockMarkets) {
             try {
-                FinancialData financialData = xueqiuWebParser.queryFinancialData(stockId);
-                databaseManager.insertOnDuplicateUpdate(CMARKETEARNING, financialData);
+                FinancialData financialData = xueqiuWebParser.queryFinancialData(sharesQuote.get_id());
+                sharesQuote.setFinancialData(financialData);
+                databaseManager.insertDocument(MongoDBConnector.CHINESE_TABLE, sharesQuote);
             } catch (IOException exc) {
-                System.err.println("Failed to parse symbol: '" + stockId + "'");
+                System.err.println("Failed to parse symbol: '" + sharesQuote.get_id() + "'");
                 exc.printStackTrace();
-            }catch (ClassNotFoundException classNotFoundException){
-                System.err.println("Failed to parse symbol: '" + stockId + "'");
-                classNotFoundException.printStackTrace();
-            } catch (SQLException sqlException){
-                System.err.println("Failed to parse symbol: '" + stockId + "'");
-                sqlException.printStackTrace();
             }
         }
     }
@@ -116,17 +106,16 @@ public class ChineseMarketMaster {
      *
      */
     public void querryAndUpdate() {
+        DatabaseManager databaseManager = null;
         try {
             System.out.println("HHa alive");
-
-
-            DatabaseManager databaseManager = DatabaseManager.initializeDataManager();
+            databaseManager = DatabaseManager.initializeDataManager();
             if (databaseManager == null) {
                 System.err.println("Failed to initialize database manager, please check database credential. \t Quit.");
                 System.exit(1);
             }
 
-            ChineseMarketCompanyRecord[] existingCompanyRecordsInDatabase = databaseManager.getExistingStocksChinese();
+            SharesQuote[] existingCompanyRecordsInDatabase = databaseManager.RetrieveCollection(MongoDBConnector.CHINESE_TABLE).toArray(new SharesQuote[0]);
 
             System.out.println("Company size: " + companiesInCsvFile.length);
             System.out.println("Querying company stock from webpage....");
@@ -172,19 +161,11 @@ public class ChineseMarketMaster {
                     SharesQuote sharesQuote = runmeFuture.result.get();
                     runmeFuture.isResultConsumed = true;
                     try {
-                        databaseManager.insertOnDuplicateUpdate(CHINESE_MARKET_COMPANY, sharesQuote);
+                        databaseManager.insertDocument(MongoDBConnector.CHINESE_TABLE, sharesQuote);
                         System.out.println(now.toString()
                                 + ": Succeed on update company: " + sharesQuote.getCompanyname()
-                                + ";  StockID: " + sharesQuote.getStockId());
-                    } catch (SQLException exc) {
-                        exc.printStackTrace();
-                        System.out.println(sharesQuote);
-                        System.exit(1);
-                    } catch (ClassNotFoundException exc) {
-                        System.out.println(sharesQuote);
-                        exc.printStackTrace();
-                        System.exit(1);
-                    }catch (Exception exc){
+                                + ";  StockID: " + sharesQuote.get_id());
+                    } catch (Exception exc){
                         System.out.println(sharesQuote);
                     }
                 }
@@ -199,7 +180,8 @@ public class ChineseMarketMaster {
             exc.printStackTrace();
         }
         finally {
-            DatabaseManager.close();
+            if (databaseManager!=null)
+                databaseManager.close();
         }
     }
 
@@ -218,47 +200,44 @@ public class ChineseMarketMaster {
      * @param companyArray
      *            : All the companiesInCsvFile to be sorted.
      */
-    private void sortCompanyArray(ChineseMarketCompanyRecord[] existingCompanyRecords, SharesQuote[] companyArray) {
+    private void sortCompanyArray(SharesQuote[] existingCompanyRecords, SharesQuote[] companyArray) {
 
         if (existingCompanyRecords == null || companyArray == null)
             return;
 
         Set<String> stockIdSet =
                 Arrays.stream(existingCompanyRecords)
-                        .map(record -> record.getStockid())
+                        .map(record -> record.get_id())
                         .collect(Collectors.toSet());
 
 
         // 1: Sort company array so that those unsearched company moved to head of array and those
         // companiesInCsvFile already in databaes moved to tail.
-        int nextSeenIdx = WebParserData.moveUnsearchedDataAhead(stockIdSet, companyArray);
+        int nextSeenIdx = SharesQuote.moveUnsearchedDataAhead(stockIdSet, companyArray);
 
 
         // 2: Sort companiesInCsvFile which is in database by lastUpdateDatetime order, e.g: the latest
         // updated company move to tail.
-        HashMap<String, ChineseMarketCompanyRecord> stockIdCompanyRecordMap = new HashMap<>();
+        HashMap<String, SharesQuote> stockIdCompanyRecordMap = new HashMap<>();
         HashMap<String, SharesQuote> stociIdSharesQuoteMap = new HashMap<>();
-        for (ChineseMarketCompanyRecord companyRecord : existingCompanyRecords) {
-            stockIdCompanyRecordMap.put(companyRecord.getStockid(), companyRecord);
+        for (SharesQuote companyRecord : existingCompanyRecords) {
+            stockIdCompanyRecordMap.put(companyRecord.get_id(), companyRecord);
         }
         for (int idx = nextSeenIdx + 1; idx < companyArray.length; idx++) {
-            stociIdSharesQuoteMap.put(companyArray[idx].getStockId(), companyArray[idx]);
+            stociIdSharesQuoteMap.put(companyArray[idx].get_id(), companyArray[idx]);
         }
 
         // These two map size should be equal otherwise the first sort method would be wrong
         Assert.assertEquals(stociIdSharesQuoteMap.size(), stockIdCompanyRecordMap.size());
 
         // Sort existingCompanyRecords
-        Arrays.sort(existingCompanyRecords, (ChineseMarketCompanyRecord a, ChineseMarketCompanyRecord b) -> a
-                .getLastUpdateDateTime()
-                .toLocalDateTime()
-                .compareTo(b.getLastUpdateDateTime().toLocalDateTime()));
+        Arrays.sort(existingCompanyRecords, Comparator.comparing(SharesQuote::getLastUpdatedTime));
 
         // Insertion sort the rest part of array based on the order of existingCompanyRecords
         for (int idx = nextSeenIdx + 1; idx < companyArray.length; idx++) {
             companyArray[idx] =
                     stociIdSharesQuoteMap.get(existingCompanyRecords[idx - nextSeenIdx - 1]
-                            .getStockid());
+                            .get_id());
         }
     }
 }

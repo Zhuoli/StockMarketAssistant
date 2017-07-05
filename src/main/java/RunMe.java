@@ -19,8 +19,6 @@ public class RunMe {
     private CommandLine cmd;
 
     public static void main(String[] args) {
-//        MongoDBConnector connector = new MongoDBConnector();
-//        connector.connect();
         RunMe runMe = new RunMe(args);
 
         if (runMe.cmd == null) {
@@ -34,10 +32,10 @@ public class RunMe {
 
         // Run one round of query & update despite the current time
         if (runMe.cmd.hasOption(MarketConstant.DEBUG)) {
-            executorService.submit(() -> {
-                usMarketMaster.init();
-                usMarketMaster.querryAndUpdate();
-            });
+//            executorService.submit(() -> {
+//                usMarketMaster.init();
+//                usMarketMaster.querryAndUpdate();
+//            });
 
             executorService.submit(() -> {
                 chineseMarketMaster.init();
@@ -64,7 +62,7 @@ public class RunMe {
 
         // Start the periodical stock parse
         chineseMarketMaster.run();
-        usMarketMaster.run();
+//        usMarketMaster.run();
     }
 
     /**

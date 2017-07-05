@@ -63,6 +63,7 @@ public class XueqiuWebParser implements IWebParser {
         SharesQuote sharesQuote =
                 SharesQuote
                         .builder()
+                        ._id(symbol)
                         .currentPrice(
                                 DOUBLE_PATTERN.matcher(map.get(PRICE)).find() ? Double.valueOf(map
                                         .get(PRICE)) : 0)
@@ -82,7 +83,8 @@ public class XueqiuWebParser implements IWebParser {
                         .oscillation(map.get(OSCILLATION))
                         .price2BookRatio(DOUBLE_PATTERN.matcher(map.get(PTB)).find() ? Double.parseDouble(map.get(PTB)) : 0)
                         .price2EarningRatio(DOUBLE_PATTERN.matcher(map.get(PTE)).find() ? Double.parseDouble(map.get(PTE)) : 0)
-                        .listingDate(new Date(System.currentTimeMillis()))
+                        .listingDate(new Date())
+                        .lastUpdatedTime(new Date())
                         .build();
         return sharesQuote;
     }
@@ -100,8 +102,7 @@ public class XueqiuWebParser implements IWebParser {
                 FinancialData
                         .builder()
                         .grossMargin(grossMargin)
-                        .stockId(symbol)
-                        .reportUrl(url)
+                        .reporturl(url)
                         .build();
         return  financialData;
     }

@@ -123,12 +123,6 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.18</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jooq/jooq -->
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq</artifactId>
-            <version>3.8.4</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
         <dependency>
             <groupId>org.mongodb</groupId>

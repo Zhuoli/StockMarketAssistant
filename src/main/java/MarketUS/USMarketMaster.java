@@ -1,11 +1,10 @@
 package MarketUS;
 
-import JooqORM.tables.records.UsmarketCompanyRecord;
 import dataEngineer.DatabaseManager;
 import dataEngineer.data.SharesQuote;
 import dataEngineer.StockCompanyCollection;
-import dataEngineer.data.WebParserData;
 import dataEngineer.financeWebEngine.NasdaqWebParser;
+import mongoDb.MongoDBConnector;
 import org.apache.commons.cli.CommandLine;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -20,7 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import static JooqORM.Tables.USMARKET_COMPANY;
 
 /**
  * US market master.
@@ -49,17 +47,17 @@ public class USMarketMaster {
      *
      */
     public void querryAndUpdate() {
+        DatabaseManager databaseManager = null;
         try {
             System.out.println("HHa alive");
 
-            DatabaseManager databaseManager = DatabaseManager.initializeDataManager();
+            databaseManager = DatabaseManager.initializeDataManager().Authenticate();
             if (databaseManager == null) {
                 System.err
                         .println("Failed to initialize database manager, please check database credential. \t Quit.");
                 System.exit(1);
             }
-
-            UsmarketCompanyRecord[] existingCompanyRecords = databaseManager.getExistingStocksUS();
+            SharesQuote[] existingCompanyRecords = databaseManager.RetrieveCollection(MongoDBConnector.US_TABLE).toArray(new SharesQuote[0]);
 
             System.out.println("Company size: " + companies.length);
             System.out.println("Querying company stock from webpage....");
@@ -113,18 +111,10 @@ public class USMarketMaster {
                     SharesQuote sharesQuote = runmeFuture.result.get();
                     runmeFuture.isResultConsumed = true;
                     try {
-                        databaseManager.insertOnDuplicateUpdate(USMARKET_COMPANY, sharesQuote);
+                        databaseManager.insertDocument(MongoDBConnector.US_TABLE, sharesQuote);
                         System.out.println(now.toString() + ": Succeed on update company: "
                                 + sharesQuote.getCompanyname() + ";  StockID: "
-                                + sharesQuote.getStockId());
-                    } catch (SQLException exc) {
-                        exc.printStackTrace();
-                        System.out.println(sharesQuote);
-                        System.exit(1);
-                    } catch (ClassNotFoundException exc) {
-                        System.out.println(sharesQuote);
-                        exc.printStackTrace();
-                        System.exit(1);
+                                + sharesQuote.get_id());
                     } catch (Exception exc) {
                         System.err.println(sharesQuote);
                         exc.printStackTrace();
@@ -140,7 +130,8 @@ public class USMarketMaster {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            DatabaseManager.close();
+            if(databaseManager!=null)
+                databaseManager.close();
         }
     }
 
@@ -191,46 +182,43 @@ public class USMarketMaster {
      * @param array
      *            : All the companies to be sorted.
      */
-    private void sortArray(UsmarketCompanyRecord[] existingCompanyRecords, SharesQuote[] array) {
+    private void sortArray(SharesQuote[] existingCompanyRecords, SharesQuote[] array) {
 
         if (existingCompanyRecords == null || array == null)
             return;
 
         Set<String> stockIdSet =
                 Arrays.stream(existingCompanyRecords)
-                        .map(record -> record.getStockid())
+                        .map(record -> record.get_id())
                         .collect(Collectors.toSet());
 
 
         // 1: Sort company array so that those unsearched company moved to head of array and those
         // companies already in databaes moved to tail.
-        int nextSeenIdx = WebParserData.moveUnsearchedDataAhead(stockIdSet, array);
+        int nextSeenIdx = SharesQuote.moveUnsearchedDataAhead(stockIdSet, array);
 
         // 2: Sort companies which is in database by lastUpdateDatetime order, e.g: the latest
         // updated company move to tail.
-        HashMap<String, UsmarketCompanyRecord> stockIdCompanyRecordMap = new HashMap<>();
+        HashMap<String, SharesQuote> stockIdCompanyRecordMap = new HashMap<>();
         HashMap<String, SharesQuote> stociIdSharesQuoteMap = new HashMap<>();
-        for (UsmarketCompanyRecord companyRecord : existingCompanyRecords) {
-            stockIdCompanyRecordMap.put(companyRecord.getStockid(), companyRecord);
+        for (SharesQuote companyRecord : existingCompanyRecords) {
+            stockIdCompanyRecordMap.put(companyRecord.get_id(), companyRecord);
         }
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
-            stociIdSharesQuoteMap.put(array[idx].getStockId(), array[idx]);
+            stociIdSharesQuoteMap.put(array[idx].get_id(), array[idx]);
         }
 
         // These two map size should be equal otherwise the first sort method would be wrong
         Assert.assertEquals(stociIdSharesQuoteMap.size(), stockIdCompanyRecordMap.size());
 
         // Sort existingCompanyRecords
-        Arrays.sort(existingCompanyRecords, (UsmarketCompanyRecord a, UsmarketCompanyRecord b) -> a
-                .getLastUpdateDateTime()
-                .toLocalDateTime()
-                .compareTo(b.getLastUpdateDateTime().toLocalDateTime()));
+        Arrays.sort(existingCompanyRecords, Comparator.comparing(SharesQuote::getLastUpdatedTime));
 
         // Insertion sort the rest part of array based on the order of existingCompanyRecords
         for (int idx = nextSeenIdx + 1; idx < array.length; idx++) {
             array[idx] =
                     stociIdSharesQuoteMap.get(existingCompanyRecords[idx - nextSeenIdx - 1]
-                            .getStockid());
+                            .get_id());
         }
     }
 }
