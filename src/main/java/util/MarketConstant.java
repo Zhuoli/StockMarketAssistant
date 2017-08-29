@@ -14,5 +14,4 @@ public class MarketConstant {
     public static final String SZ_STOCK_LIST_PATH = "StockListSZ.csv";
     public static final String SH_STOCK_LIST_PATH = "StockListSH.csv";
     public static final String NASDAQ_STOCK_LIST_PATH = "StockListNasdaq.csv";
-    public static final String  RESOURCE_CONFIG="resourceConfig.xml";
 }

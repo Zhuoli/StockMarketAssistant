@@ -23,7 +23,7 @@ import static com.mongodb.client.model.Filters.eq;
  */
 public class MongoDBConnector {
     public static final String DB_NAME = "stockdb";
-    private static String con = "mongodb://stockdbzhuoli:QrLUUzcspLOK2pjdEvVlevms5zCfvhQlChWOtrLVRI1r5HF1mKwAKwwFm296SBSWLoOPnAQ8apN8zaPPYA3inQ==@stockdbzhuoli.documents.azure.com:10255/?ssl=true&replicaSet=globaldb";
+    private static String con = "mongodb://stockmarketdbzhuoli:FMB5jJ6pGLwDlTzpJxCM6sD2gE7Y1UAFoQ7tWVpppTz5W9AXe0NnerY5GaRkfPMYZIa7xopJUeMaduHsOwVm6Q==@stockmarketdbzhuoli.documents.azure.com:10255/?ssl=true&replicaSet=globaldb";
     public static final String CHINESE_TABLE = "chinesestockmarket";
     public static final String US_TABLE = "usstockcompany";
     MongoClient mongoClient = null;
@@ -32,6 +32,7 @@ public class MongoDBConnector {
     public void connect(){
         this.mongoClient = new MongoClient(new MongoClientURI(MongoDBConnector.con));
         this.mongoDatabase = this.mongoClient.getDatabase(DB_NAME);
+        Assert.assertNotNull("Could not find the giving database: " + DB_NAME, this.mongoDatabase);
     }
 
     public void test(){
