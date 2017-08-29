@@ -1,13 +1,9 @@
 import MarketChinese.ChineseMarketMaster;
 import MarketUS.USMarketMaster;
-import dataEngineer.data.FinancialData;
 import dataEngineer.financeWebEngine.XueqiuWebParser;
-import mongoDb.MongoDBConnector;
 import org.apache.commons.cli.*;
 import util.MarketConstant;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +15,7 @@ public class RunMe {
     private CommandLine cmd;
 
     public static void main(String[] args) {
+
         RunMe runMe = new RunMe(args);
 
         if (runMe.cmd == null) {

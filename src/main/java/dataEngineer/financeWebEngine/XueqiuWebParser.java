@@ -1,6 +1,7 @@
 package dataEngineer.financeWebEngine;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import dataEngineer.data.NewStockIPO;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -14,10 +15,7 @@ import org.jsoup.select.Elements;
 import org.junit.Assert;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -161,7 +159,6 @@ public class XueqiuWebParser implements IWebParser {
 
         WebDriver driver = new HtmlUnitDriver(BrowserVersion.CHROME, true);
 
-        // Navigate to Google
         driver.get(url);
         List<WebElement> elements = driver.findElements(By.tagName("table"));
 
@@ -177,6 +174,25 @@ public class XueqiuWebParser implements IWebParser {
             map.put(rowName, values);
         }
         return map;
+    }
+
+    static final String NEW_IPO_URL = "https://xueqiu.com/hq#xgss";
+    public List<NewStockIPO> parseNewIPOCompanies(){
+        LinkedList<NewStockIPO> newStockIPOS = new LinkedList<>();
+        WebDriver driver = new HtmlUnitDriver(BrowserVersion.CHROME, true);
+
+        // Navigate to Google
+        driver.get(NEW_IPO_URL);
+        WebElement table = driver.findElement(By.cssSelector("[class~=newstock-firstday]  table"));
+        List<WebElement> heads = driver.findElements(By.cssSelector("[class~=newstock-firstday]  table thead th"));
+        List<WebElement> allRows = table.findElements(By.cssSelector("[class~=newstock-firstday]  table tbody tr"));
+        for(WebElement row : allRows){
+            List<WebElement> cols = row.findElements(By.cssSelector("td"));
+            String stockId = cols.get(0).findElement(By.cssSelector("a")).getAttribute("href");
+            stockId = stockId.substring(stockId.lastIndexOf("/")+1);
+            newStockIPOS.add(new NewStockIPO(stockId, cols.get(0).getText(), cols.get(1).getText()));
+        }
+        return newStockIPOS;
     }
 
 }

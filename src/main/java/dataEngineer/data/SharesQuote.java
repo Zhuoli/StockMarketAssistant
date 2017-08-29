@@ -15,6 +15,8 @@ import java.util.Set;
 public class SharesQuote{
     private String _id;
 
+    private String dateFirstIPO;
+
     private String companyname;
 
     private double currentPrice;
@@ -42,8 +44,6 @@ public class SharesQuote{
     private double price2EarningRatio;
     // 市净率
     private double price2BookRatio;
-
-    private String officialWebUrl;
 
     private String oneYearTargetPrice;
 

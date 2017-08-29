@@ -48,6 +48,7 @@ public class ChineseMarketMaster {
         if(!this.isInited)
             this.init();
 
+        boolean isNewDay = true;
         while (true) {
             DateTime now = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("Asia/Shanghai"));
             try {
@@ -57,9 +58,16 @@ public class ChineseMarketMaster {
                     continue;
                 }
                 if (now.getHourOfDay() < 8 || now.getHourOfDay() > 17) {
+                    isNewDay = true;
                     System.out.println(now.toString() + ": Sleep 5 minutes off hour.");
                     Thread.sleep(5 * 60 * 1000);
                     continue;
+                }
+
+                // Retrieve IPO companies once daily
+                if (isNewDay){
+                    isNewDay = false;
+                    this.retrieveIPOstocks();
                 }
             } catch (InterruptedException exc) {
                 System.out.println("Interrupted exception received, gonna launch querryAndUpdate...");
@@ -67,6 +75,10 @@ public class ChineseMarketMaster {
             this.querryAndUpdate();
             System.out.println(LocalDateTime.now().toString() + " One loop Job done.");
         }
+    }
+
+    public void retrieveIPOstocks(){
+        XueqiuWebParser xueqiuWebParser = new XueqiuWebParser();
     }
 
 

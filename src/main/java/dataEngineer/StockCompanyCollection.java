@@ -114,26 +114,20 @@ public final class StockCompanyCollection {
             if (scanner.hasNext()) {
                 List<String> headers = parseLine(scanner.nextLine());
                 Assert.assertNotNull(headers);
-                Assert.assertTrue(headers.size() >= 7);
-                Assert.assertEquals("公司代码", headers.get(0).substring(1, 5));
-                Assert.assertEquals("公司简称", headers.get(1).substring(0, 4));
-                Assert.assertEquals("A股代码", headers.get(2).substring(0, 4));
-                Assert.assertEquals("A股简称", headers.get(3).substring(0, 4));
-                Assert.assertEquals("A股上市日期", headers.get(4));
-                Assert.assertEquals("A股总股本", headers.get(5));
-                Assert.assertEquals("A股流通股本", headers.get(6));
+                Assert.assertTrue(headers.size() == 3);
             }
 
             // Read row
             while (scanner.hasNext()) {
                 List<String> line = parseLine(scanner.nextLine());
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a, b) -> a + "\nB: -> " + b),
-                        7, line.size());
+                        3, line.size());
                 SharesQuote companyObject =
                         SharesQuote
                                 .builder()
-                                ._id("sh" + line.get(2).trim())
-                                .companyname(line.get(3).trim())
+                                ._id("sh" + line.get(0))
+                                .companyname(line.get(1))
+                                .dateFirstIPO(line.get(2))
                                 .lastUpdatedTime(new Date(Long.MIN_VALUE))
                                 .build();
                 companyObjectList.add(companyObject);
@@ -160,26 +154,21 @@ public final class StockCompanyCollection {
             if (scanner.hasNext()) {
                 List<String> headers = parseLine(scanner.nextLine());
                 Assert.assertNotNull(headers);
-                Assert.assertEquals("公司代码", headers.get(0).substring(1));
-                Assert.assertEquals("公司简称", headers.get(1));
-                Assert.assertEquals("公司全称", headers.get(2));
-                Assert.assertEquals("A股代码", headers.get(5));
-                Assert.assertEquals("公司网址", headers.get(19));
+                Assert.assertEquals("A股代码", headers.get(0));
+                Assert.assertEquals("A股简称", headers.get(1));
+                Assert.assertEquals("A股上市日期", headers.get(2));
             }
             while (scanner.hasNext()) {
                 List<String> line = parseLine(scanner.nextLine());
                 Assert.assertEquals(line.stream().reduce("Line-> ", (a, b) -> a + "\nB: -> " + b),
-                        20, line.size());
+                        3, line.size());
                 SharesQuote companyObject =
                         SharesQuote
                                 .builder()
-                                .companyname(line.get(1))
                                 ._id(
-                                        "sz"
-                                                + StringUtils.repeat("0",
-                                                        Math.max(0, 6 - line.get(5).length()))
-                                                + line.get(5))
-                                .officialWebUrl(line.get(19))
+                                        "sz" + line.get(0))
+                                .companyname(line.get(1))
+                                .dateFirstIPO(line.get(2))
                                 .lastUpdatedTime(new Date(Long.MIN_VALUE))
                                 .build();
                 companyObjectList.add(companyObject);
@@ -188,6 +177,7 @@ public final class StockCompanyCollection {
         } catch (Exception exc) {
             System.err.println("Exception on idx: " + companyObjectList.size() + "\n"
                     + exc.getMessage());
+            System.exit(1);
         }
         return companyObjectList;
     }
