@@ -29,10 +29,11 @@ public class RunMe {
 
         // Run one round of query & update despite the current time
         if (runMe.cmd.hasOption(MarketConstant.DEBUG)) {
-            executorService.submit(() -> {
-                usMarketMaster.init();
-                usMarketMaster.querryAndUpdate();
-            });
+            // Disable us market as we don't need it currently
+//            executorService.submit(() -> {
+//                usMarketMaster.init();
+//                usMarketMaster.querryAndUpdate();
+//            });
 
             executorService.submit(() -> {
                 chineseMarketMaster.init();

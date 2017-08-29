@@ -38,13 +38,13 @@ public final class StockCompanyCollection {
         if (companyObjectCollection == null) {
             companyObjectCollection = new LinkedList<>();
             companyObjectCollection.addAll(this
-                    .readSZAStockCompanyList(isDebug ? "./src/main/resources/"
+                    .readStockCompanyList(isDebug ? "./src/main/resources/"
                             + MarketConstant.SZ_STOCK_LIST_PATH : "./"
-                            + MarketConstant.SZ_STOCK_LIST_PATH));
+                            + MarketConstant.SZ_STOCK_LIST_PATH, "sz"));
             companyObjectCollection.addAll(this
-                    .readSHAStockCompanyList(isDebug ? "./src/main/resources/"
+                    .readStockCompanyList(isDebug ? "./src/main/resources/"
                             + MarketConstant.SH_STOCK_LIST_PATH : "./"
-                            + MarketConstant.SH_STOCK_LIST_PATH));
+                            + MarketConstant.SH_STOCK_LIST_PATH, "sh"));
         }
         return companyObjectCollection.toArray(new SharesQuote[0]);
     }
@@ -95,47 +95,7 @@ public final class StockCompanyCollection {
         } catch (IOException exc) {
             System.err.println("Exception on idx: " + companyObjectList.size() + "\n"
                     + exc.getMessage());
-        }
-        return companyObjectList;
-    }
-
-    /**
-     * Reads ShangHai Stock Market company list.
-     * 
-     * @param csvFile
-     * @return : A Stock market company list;
-     */
-    private List<SharesQuote> readSHAStockCompanyList(String csvFile) {
-
-        System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
-        Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
-        List<SharesQuote> companyObjectList = new LinkedList<>();
-        try (Scanner scanner = new Scanner(new File(csvFile))) {
-            if (scanner.hasNext()) {
-                List<String> headers = parseLine(scanner.nextLine());
-                Assert.assertNotNull(headers);
-                Assert.assertTrue(headers.size() == 3);
-            }
-
-            // Read row
-            while (scanner.hasNext()) {
-                List<String> line = parseLine(scanner.nextLine());
-                Assert.assertEquals(line.stream().reduce("Line-> ", (a, b) -> a + "\nB: -> " + b),
-                        3, line.size());
-                SharesQuote companyObject =
-                        SharesQuote
-                                .builder()
-                                ._id("sh" + line.get(0))
-                                .companyname(line.get(1))
-                                .dateFirstIPO(line.get(2))
-                                .lastUpdatedTime(new Date(Long.MIN_VALUE))
-                                .build();
-                companyObjectList.add(companyObject);
-            }
-
-        } catch (IOException exc) {
-            System.err.println("Exception on idx: " + companyObjectList.size() + "\n"
-                    + exc.getMessage());
+            System.exit(1);
         }
         return companyObjectList;
     }
@@ -146,7 +106,7 @@ public final class StockCompanyCollection {
      * @param csvFile
      * @return List of company.
      */
-    private List<SharesQuote> readSZAStockCompanyList(String csvFile) {
+    private List<SharesQuote> readStockCompanyList(String csvFile, String idPrefix) {
         System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
         Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
         List<SharesQuote> companyObjectList = new LinkedList<>();
@@ -166,7 +126,7 @@ public final class StockCompanyCollection {
                         SharesQuote
                                 .builder()
                                 ._id(
-                                        "sz" + line.get(0))
+                                        idPrefix + line.get(0))
                                 .companyname(line.get(1))
                                 .dateFirstIPO(line.get(2))
                                 .lastUpdatedTime(new Date(Long.MIN_VALUE))
