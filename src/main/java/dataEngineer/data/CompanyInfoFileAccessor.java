@@ -1,50 +1,56 @@
-package dataEngineer;
+package dataEngineer.data;
 
-import java.io.*;
+import org.junit.Assert;
+import sun.security.provider.SHA;
+import util.MarketConstant;
+
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-import dataEngineer.data.SharesQuote;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import util.MarketConstant;
-
 /**
  * Created by zhuolil on 1/16/17.
  */
-public final class StockCompanyCollection {
+public final class CompanyInfoFileAccessor {
 
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
-    private static StockCompanyCollection thisInstance = null;
+    private static CompanyInfoFileAccessor thisInstance = null;
     private static Collection<SharesQuote> companyObjectCollection = null;
 
-    private StockCompanyCollection() {
+    private String SZFilePath, SHFilePath, USFilePath;
+
+    private CompanyInfoFileAccessor() {
         // Does nothing
     }
 
-    public static StockCompanyCollection getInstance() {
+    public static CompanyInfoFileAccessor getInstance(boolean isDebug) {
         if (thisInstance == null) {
-            thisInstance = new StockCompanyCollection();
+            thisInstance = new CompanyInfoFileAccessor();
         }
+        String msg = isDebug ? "Application is run in IDE" : "Application is run in jar";
+        System.out.println(msg);
+        thisInstance.SZFilePath = isDebug ? "./src/main/resources/"
+                + MarketConstant.SZ_STOCK_LIST_PATH : "./"
+                + MarketConstant.SZ_STOCK_LIST_PATH;
+        thisInstance.SHFilePath = isDebug ? "./src/main/resources/"
+                + MarketConstant.SH_STOCK_LIST_PATH : "./"
+                + MarketConstant.SH_STOCK_LIST_PATH;
+        thisInstance.USFilePath = isDebug ? "./src/main/resources/" + MarketConstant.NASDAQ_STOCK_LIST_PATH : "./"
+                + MarketConstant.NASDAQ_STOCK_LIST_PATH;
         return thisInstance;
     }
 
-    public SharesQuote[] queryCompanyListChinese(boolean isDebug) {
-        String msg = isDebug ? "Application is run in IDE" : "Application is run in jar";
-        System.out.println(msg);
+    public SharesQuote[] queryCompanyListChinese() {
 
         if (companyObjectCollection == null) {
             companyObjectCollection = new LinkedList<>();
             companyObjectCollection.addAll(this
-                    .readStockCompanyList(isDebug ? "./src/main/resources/"
-                            + MarketConstant.SZ_STOCK_LIST_PATH : "./"
-                            + MarketConstant.SZ_STOCK_LIST_PATH, "sz"));
+                    .readStockCompanyList(this.SZFilePath, "sz"));
             companyObjectCollection.addAll(this
-                    .readStockCompanyList(isDebug ? "./src/main/resources/"
-                            + MarketConstant.SH_STOCK_LIST_PATH : "./"
-                            + MarketConstant.SH_STOCK_LIST_PATH, "sh"));
+                    .readStockCompanyList(this.SHFilePath, "sh"));
         }
         return companyObjectCollection.toArray(new SharesQuote[0]);
     }
@@ -52,15 +58,12 @@ public final class StockCompanyCollection {
     public SharesQuote[] queryCompanyListUS(boolean isDebug) {
         String msg = isDebug ? "Application is run in IDE" : "Application is run in jar";
         System.out.println(msg);
-        String path =
-                isDebug ? "./src/main/resources/" + MarketConstant.NASDAQ_STOCK_LIST_PATH : "./"
-                        + MarketConstant.NASDAQ_STOCK_LIST_PATH;
-        return this.readNasdaqCompanyList(path).toArray(new SharesQuote[0]);
+        return this.readNasdaqCompanyList(thisInstance.USFilePath).toArray(new SharesQuote[0]);
     }
 
     /**
      * Reads Nasdaq company list.
-     * 
+     *
      * @param csvFile
      * @return list of shares quote.
      */
@@ -102,7 +105,7 @@ public final class StockCompanyCollection {
 
     /**
      * Reads ShenZhen Stock A Market.
-     * 
+     *
      * @param csvFile
      * @return List of company.
      */
@@ -140,6 +143,12 @@ public final class StockCompanyCollection {
             System.exit(1);
         }
         return companyObjectList;
+    }
+
+    public void writeToStockCSV(SharesQuote... sharesQuotes){
+        for(SharesQuote sharesQuote : sharesQuotes){
+
+        }
     }
 
     public static List<String> parseLine(String cvsLine) {

@@ -2,7 +2,6 @@ package MarketUS;
 
 import dataEngineer.DatabaseManager;
 import dataEngineer.data.SharesQuote;
-import dataEngineer.StockCompanyCollection;
 import dataEngineer.financeWebEngine.NasdaqWebParser;
 import mongoDb.MongoDBConnector;
 import org.apache.commons.cli.CommandLine;
@@ -12,7 +11,6 @@ import org.junit.Assert;
 import util.MarketConstant;
 import util.RunmeFuture;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;

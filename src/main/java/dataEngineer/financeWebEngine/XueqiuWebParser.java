@@ -1,7 +1,6 @@
 package dataEngineer.financeWebEngine;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
-import dataEngineer.data.NewStockIPO;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -17,8 +16,6 @@ import org.junit.Assert;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * Created by zhuolil on 2/2/17.
@@ -177,8 +174,8 @@ public class XueqiuWebParser implements IWebParser {
     }
 
     static final String NEW_IPO_URL = "https://xueqiu.com/hq#xgss";
-    public List<NewStockIPO> parseNewIPOCompanies(){
-        LinkedList<NewStockIPO> newStockIPOS = new LinkedList<>();
+    public List<SharesQuote> parseNewIPOCompanies(){
+        LinkedList<SharesQuote> newStockIPOS = new LinkedList<>();
         WebDriver driver = new HtmlUnitDriver(BrowserVersion.CHROME, true);
 
         // Navigate to Google
@@ -190,7 +187,8 @@ public class XueqiuWebParser implements IWebParser {
             List<WebElement> cols = row.findElements(By.cssSelector("td"));
             String stockId = cols.get(0).findElement(By.cssSelector("a")).getAttribute("href");
             stockId = stockId.substring(stockId.lastIndexOf("/")+1);
-            newStockIPOS.add(new NewStockIPO(stockId, cols.get(0).getText(), cols.get(1).getText()));
+            newStockIPOS.add(
+                    SharesQuote.builder()._id(stockId).companyname(cols.get(0).getText()).dateFirstIPO(cols.get(1).getText()).build());
         }
         return newStockIPOS;
     }

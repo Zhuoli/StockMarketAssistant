@@ -1,8 +1,8 @@
 package MarketChinese;
 import dataEngineer.DatabaseManager;
+import dataEngineer.data.CompanyInfoFileAccessor;
 import dataEngineer.data.FinancialData;
 import dataEngineer.data.SharesQuote;
-import dataEngineer.StockCompanyCollection;
 import dataEngineer.financeWebEngine.XueqiuWebParser;
 import mongoDb.MongoDBConnector;
 import org.apache.commons.cli.CommandLine;
@@ -36,8 +36,8 @@ public class ChineseMarketMaster {
      */
     public void init(){
         Assert.assertNotNull(cmd);
-        StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
-        this.companiesInCsvFile = companyCollection.queryCompanyListChinese(cmd.hasOption(MarketConstant.IS_UNDER_INTELLIJ));
+        CompanyInfoFileAccessor companyCollection = CompanyInfoFileAccessor.getInstance(cmd.hasOption(MarketConstant.IS_UNDER_INTELLIJ));
+        this.companiesInCsvFile = companyCollection.queryCompanyListChinese();
         this.isInited = true;
     }
 
@@ -79,6 +79,7 @@ public class ChineseMarketMaster {
 
     public void retrieveIPOstocks(){
         XueqiuWebParser xueqiuWebParser = new XueqiuWebParser();
+        List<SharesQuote> newIPOCompanies = xueqiuWebParser.parseNewIPOCompanies();
     }
 
 

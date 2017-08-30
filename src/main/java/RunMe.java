@@ -1,6 +1,5 @@
 import MarketChinese.ChineseMarketMaster;
 import MarketUS.USMarketMaster;
-import dataEngineer.financeWebEngine.XueqiuWebParser;
 import org.apache.commons.cli.*;
 import util.MarketConstant;
 
@@ -16,6 +15,7 @@ public class RunMe {
 
     public static void main(String[] args) {
 
+        new ChineseMarketMaster(null).retrieveIPOstocks();
         RunMe runMe = new RunMe(args);
 
         if (runMe.cmd == null) {
