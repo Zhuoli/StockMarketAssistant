@@ -1,6 +1,7 @@
 package MarketUS;
 
 import dataEngineer.DatabaseManager;
+import dataEngineer.data.CompanyInfoFileAccessor;
 import dataEngineer.data.SharesQuote;
 import dataEngineer.financeWebEngine.NasdaqWebParser;
 import mongoDb.MongoDBConnector;
@@ -33,7 +34,7 @@ public class USMarketMaster {
 
     public void init() {
         Assert.assertNotNull(cmd);
-        StockCompanyCollection companyCollection = StockCompanyCollection.getInstance();
+        CompanyInfoFileAccessor companyCollection = CompanyInfoFileAccessor.getInstance(cmd.hasOption(MarketConstant.IS_UNDER_INTELLIJ));
         this.companies =
                 companyCollection.queryCompanyListUS(cmd
                         .hasOption(MarketConstant.IS_UNDER_INTELLIJ));

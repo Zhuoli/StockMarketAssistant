@@ -26,9 +26,11 @@ public class ChineseMarketMaster {
 
     CommandLine cmd;
     SharesQuote[] companiesInCsvFile;
+    CompanyInfoFileAccessor companyInfoFileAccessor;
     boolean isInited = false;
     public ChineseMarketMaster(CommandLine cmd){
         this.cmd = cmd;
+        companyInfoFileAccessor = CompanyInfoFileAccessor.getInstance(cmd.hasOption(MarketConstant.IS_UNDER_INTELLIJ));
     }
 
     /**
@@ -36,8 +38,7 @@ public class ChineseMarketMaster {
      */
     public void init(){
         Assert.assertNotNull(cmd);
-        CompanyInfoFileAccessor companyCollection = CompanyInfoFileAccessor.getInstance(cmd.hasOption(MarketConstant.IS_UNDER_INTELLIJ));
-        this.companiesInCsvFile = companyCollection.queryCompanyListChinese();
+        this.companiesInCsvFile = companyInfoFileAccessor.queryCompanyListChinese();
         this.isInited = true;
     }
 
@@ -80,6 +81,15 @@ public class ChineseMarketMaster {
     public void retrieveIPOstocks(){
         XueqiuWebParser xueqiuWebParser = new XueqiuWebParser();
         List<SharesQuote> newIPOCompanies = xueqiuWebParser.parseNewIPOCompanies();
+        try {
+            this.companyInfoFileAccessor.appendChineseIPO(newIPOCompanies.toArray(new SharesQuote[0]));
+        }catch (IOException exc){
+            System.err.println("Failed on write back new IPOs.\n");
+            exc.printStackTrace();
+        }
+
+        // update in memory data
+        this.companiesInCsvFile = companyInfoFileAccessor.queryCompanyListChinese();
     }
 
 

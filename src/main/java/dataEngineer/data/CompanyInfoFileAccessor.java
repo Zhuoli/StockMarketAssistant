@@ -1,11 +1,12 @@
 package dataEngineer.data;
 
 import org.junit.Assert;
-import sun.security.provider.SHA;
 import util.MarketConstant;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -53,6 +54,24 @@ public final class CompanyInfoFileAccessor {
                     .readStockCompanyList(this.SHFilePath, "sh"));
         }
         return companyObjectCollection.toArray(new SharesQuote[0]);
+    }
+
+    public void appendChineseIPO(SharesQuote... companyInfos) throws IOException{
+        for(SharesQuote companyInfo : companyInfos){
+            Assert.assertTrue("Stock Symbol should start with either SH or SZ : " + companyInfo.get_id(),
+                    companyInfo.get_id().toLowerCase().startsWith("sz") || companyInfo.get_id().toLowerCase().startsWith("sh"));
+
+            String filename = companyInfo.get_id().toLowerCase().startsWith("sz") ? thisInstance.SZFilePath : thisInstance.SHFilePath;
+            String symboleWithoutPrefix = companyInfo.get_id().substring(2);
+            List<String> lines = Files.readAllLines(Paths.get(filename));
+            if(lines.stream().anyMatch(str -> str.startsWith(symboleWithoutPrefix)))
+                continue;
+
+            try(PrintWriter output = new PrintWriter(new FileWriter(filename,true)))
+            {
+                output.println(String.format("%s,%s,%s", symboleWithoutPrefix, companyInfo.getCompanyname(), companyInfo.getDateFirstIPO()));
+            }
+        }
     }
 
     public SharesQuote[] queryCompanyListUS(boolean isDebug) {
@@ -143,12 +162,6 @@ public final class CompanyInfoFileAccessor {
             System.exit(1);
         }
         return companyObjectList;
-    }
-
-    public void writeToStockCSV(SharesQuote... sharesQuotes){
-        for(SharesQuote sharesQuote : sharesQuotes){
-
-        }
     }
 
     public static List<String> parseLine(String cvsLine) {
