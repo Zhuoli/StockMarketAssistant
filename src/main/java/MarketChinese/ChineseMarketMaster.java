@@ -220,47 +220,26 @@ public class ChineseMarketMaster {
      *
      * @param existingCompanyRecords
      *            : company records in database.
-     * @param companyArray
+     * @param companiesInCsvFile
      *            : All the companiesInCsvFile to be sorted.
      */
-    private void sortCompanyArray(SharesQuote[] existingCompanyRecords, SharesQuote[] companyArray) {
+    private void sortCompanyArray(SharesQuote[] existingCompanyRecords, SharesQuote[] companiesInCsvFile) {
 
-        if (existingCompanyRecords == null || companyArray == null)
+        if (existingCompanyRecords == null || companiesInCsvFile == null)
             return;
 
-        Set<String> stockIdSet =
-                Arrays.stream(existingCompanyRecords)
-                        .map(record -> record.get_id())
-                        .collect(Collectors.toSet());
-
-
-        // 1: Sort company array so that those unsearched company moved to head of array and those
-        // companiesInCsvFile already in databaes moved to tail.
-        int nextSeenIdx = SharesQuote.moveUnsearchedDataAhead(stockIdSet, companyArray);
-
-
-        // 2: Sort companiesInCsvFile which is in database by lastUpdateDatetime order, e.g: the latest
-        // updated company move to tail.
         HashMap<String, SharesQuote> stockIdCompanyRecordMap = new HashMap<>();
-        HashMap<String, SharesQuote> stociIdSharesQuoteMap = new HashMap<>();
         for (SharesQuote companyRecord : existingCompanyRecords) {
             stockIdCompanyRecordMap.put(companyRecord.get_id(), companyRecord);
         }
-        for (int idx = nextSeenIdx + 1; idx < companyArray.length; idx++) {
-            stociIdSharesQuoteMap.put(companyArray[idx].get_id(), companyArray[idx]);
+
+        for(int idx=0; idx<companiesInCsvFile.length; idx++){
+            String symbol = companiesInCsvFile[idx].get_id();
+            if(stockIdCompanyRecordMap.containsKey(symbol)){
+                companiesInCsvFile[idx] = stockIdCompanyRecordMap.get(symbol);
+            }
         }
-
-        // These two map size should be equal otherwise the first sort method would be wrong
-        Assert.assertEquals(stociIdSharesQuoteMap.size(), stockIdCompanyRecordMap.size());
-
         // Sort existingCompanyRecords
-        Arrays.sort(existingCompanyRecords, Comparator.comparing(SharesQuote::getLastUpdatedTime));
-
-        // Insertion sort the rest part of array based on the order of existingCompanyRecords
-        for (int idx = nextSeenIdx + 1; idx < companyArray.length; idx++) {
-            companyArray[idx] =
-                    stociIdSharesQuoteMap.get(existingCompanyRecords[idx - nextSeenIdx - 1]
-                            .get_id());
-        }
+        Arrays.sort(companiesInCsvFile, Comparator.comparing(SharesQuote::getLastUpdatedTime));
     }
 }

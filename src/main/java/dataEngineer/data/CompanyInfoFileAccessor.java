@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.Calendar;
 
 /**
  * Created by zhuolil on 1/16/17.
@@ -128,6 +129,7 @@ public final class CompanyInfoFileAccessor {
      * @param csvFile
      * @return List of company.
      */
+    static Calendar calendar = new Calendar.Builder().setDate(1999, 01,01).build();
     private List<SharesQuote> readStockCompanyList(String csvFile, String idPrefix) {
         System.out.println("Current path: " + Paths.get(".").toAbsolutePath());
         Assert.assertTrue("File not exist: " + csvFile, Files.exists(Paths.get(csvFile)));
@@ -151,7 +153,7 @@ public final class CompanyInfoFileAccessor {
                                         idPrefix + line.get(0))
                                 .companyname(line.get(1))
                                 .dateFirstIPO(line.get(2))
-                                .lastUpdatedTime(new Date(Long.MIN_VALUE))
+                                .lastUpdatedTime(calendar.getTime())
                                 .build();
                 companyObjectList.add(companyObject);
             }
