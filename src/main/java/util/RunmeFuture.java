@@ -28,6 +28,9 @@ public class RunmeFuture {
             try {
                 SharesQuote quote = webParser.queryCompanyStock(companyObject.get_id());
                 quote.setCompanyname(companyObject.getCompanyname());
+                if (quote.getDateFirstIPO() == null || quote.getDateFirstIPO().isEmpty()){
+                    quote.setDateFirstIPO(companyObject.getDateFirstIPO());
+                }
                 this.result = Optional.of(quote);
             } catch (IOException exc) {
                 exc.printStackTrace();
