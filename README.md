@@ -1,5 +1,5 @@
 # ChineseStockMarketAssistant
-[Chinese stock market Assistant](http://zhuoliliang.com/cstock/company/index)
+[Chinese stock market Assistant](https://zhuoliliang.com/cstock)
 
 Parse Sina Finiance and collect companies' market info.
 
