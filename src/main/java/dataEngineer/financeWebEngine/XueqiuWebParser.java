@@ -108,9 +108,11 @@ public class XueqiuWebParser implements IWebParser {
             Document dom = Jsoup.connect(reportUrl).userAgent(XueqiuWebParser.USER_AGENT).get();
 
             Elements elements = dom.getElementsByAttribute("data-current");
-            String currentPrice = "0";
+            String currentPrice = "无法抓取";
             if (elements.size() == 1)
                 currentPrice = elements.first().text();
+            else if(dom.getElementById("currentQuote")!=null)
+                currentPrice = dom.getElementById("currentQuote").text();
 
             if (currentPrice.startsWith("￥"))
                 currentPrice = currentPrice.substring(1);
