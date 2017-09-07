@@ -78,6 +78,11 @@ public class XueqiuWebParser implements IWebParser {
                         .listingDate(new Date())
                         .lastUpdatedTime(new Date())
                         .build();
+        if(DOUBLE_PATTERN.matcher(sharesQuote.getCurrentPrice()).find() && DOUBLE_PATTERN.matcher(sharesQuote.getOpenPrice()).find()) {
+            double currentPrice = Double.parseDouble(sharesQuote.getCurrentPrice());
+            double openPrice = Double.parseDouble(sharesQuote.getOpenPrice());
+            sharesQuote.setChangePercent(String.format("%.2f", (currentPrice - openPrice)/openPrice));
+        }
         return sharesQuote;
     }
 
