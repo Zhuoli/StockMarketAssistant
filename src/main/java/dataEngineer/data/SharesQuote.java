@@ -19,9 +19,9 @@ public class SharesQuote{
 
     private String companyname;
 
-    private double currentPrice;
+    private String currentPrice;
 
-    private double openPrice;
+    private String openPrice;
     private double highestPrice;
     private double lowestPrice;
     private double closePrice;

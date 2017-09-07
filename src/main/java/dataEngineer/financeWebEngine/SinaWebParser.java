@@ -53,11 +53,11 @@ public class SinaWebParser implements IWebParser {
         SharesQuote sharesQuote =
                 SharesQuote
                         .builder()
-                        .currentPrice(Double.parseDouble(map.get(PRICE)))
+                        .currentPrice(map.get(PRICE))
                         .closePrice(Double.parseDouble(map.get(CLOSE_PRICE)))
                         .highestPrice(Double.parseDouble(map.get(HIGHEST_PRICE)))
                         .lowestPrice(Double.parseDouble(map.get(LOWEST_PRICE)))
-                        .openPrice(Double.parseDouble(map.get(OPEN_PRICE)))
+                        .openPrice((map.get(OPEN_PRICE)))
                         .dealVolum(map.get(DEAL_VOLUM))
                         .dealValue(map.get(DEAL_VALUE))
                         .marketCap(map.get(MARKET_CAP))

@@ -41,11 +41,11 @@ public class MongoDBConnector {
                 .builder()
                     ._id("sz000001")
                 .companyname("平安银行")
-                .currentPrice(123.5)
+                .currentPrice("123.5")
                 .lastUpdatedTime(new Date())
                 .financialData(FinancialData.builder().grossMargin(31).reporturl("www.qq.com").roe(10).build())
                 .build();
-        SharesQuote usCompany = SharesQuote.builder()._id("amzn").companyname("Amazon").currentPrice(985).lastUpdatedTime(new Date()).build();
+        SharesQuote usCompany = SharesQuote.builder()._id("amzn").companyname("Amazon").currentPrice("985").lastUpdatedTime(new Date()).build();
         this.insertDocument(MongoDBConnector.CHINESE_TABLE ,stockCompany);
         this.insertDocument(MongoDBConnector.US_TABLE, usCompany);
         List<SharesQuote> stockMarkets = this.retrieveDcouments(MongoDBConnector.CHINESE_TABLE);

@@ -58,7 +58,7 @@ public class NasdaqWebParser implements IWebParser {
                 SharesQuote
                         .builder()
                         ._id(symbol)
-                        .currentPrice(this.quoteDoubleElement(symbol, NasdaqWebParser.PRICE_ID))
+                        .currentPrice(this.quoteStringElement(symbol, NasdaqWebParser.PRICE_ID))
                         .listingDate(new Date(System.currentTimeMillis()))
                         .build();
         List<Element> tableRows = this.getTableRows(NasdaqWebParser.URL_BASE + "/" + symbol);

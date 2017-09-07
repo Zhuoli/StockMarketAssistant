@@ -59,9 +59,7 @@ public class XueqiuWebParser implements IWebParser {
                 SharesQuote
                         .builder()
                         ._id(symbol)
-                        .currentPrice(
-                                DOUBLE_PATTERN.matcher(map.get(PRICE)).find() ? Double.valueOf(map
-                                        .get(PRICE)) : 0)
+                        .currentPrice(map.get(PRICE))
                         .closePrice(
                                 DOUBLE_PATTERN.matcher(map.get(CLOSE_PRICE)).find() ? Double
                                         .parseDouble(map.get(CLOSE_PRICE)) : 0)
@@ -69,8 +67,7 @@ public class XueqiuWebParser implements IWebParser {
                                 .get(HIGHEST_PRICE)) : 0)
                         .lowestPrice(DOUBLE_PATTERN.matcher(map.get(LOWEST_PRICE)).find() ? Double.parseDouble(map
                                 .get(LOWEST_PRICE)) : 0)
-                        .openPrice(DOUBLE_PATTERN.matcher(map.get(OPEN_PRICE)).find() ? Double.parseDouble(map
-                                .get(OPEN_PRICE)) : 0)
+                        .openPrice(map.get(OPEN_PRICE))
                         .dealVolum(map.get(DEAL_VOLUM))
                         .dealValue(map.get(DEAL_VALUE))
                         .marketCap(map.get(MARKET_CAP))
