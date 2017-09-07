@@ -236,7 +236,7 @@ public class ChineseMarketMaster {
         for(int idx=0; idx<companiesInCsvFile.length; idx++){
             String symbol = companiesInCsvFile[idx].get_id();
             if(stockIdCompanyRecordMap.containsKey(symbol)){
-                companiesInCsvFile[idx] = stockIdCompanyRecordMap.get(symbol);
+                companiesInCsvFile[idx].setLastUpdatedTime(stockIdCompanyRecordMap.get(symbol).getLastUpdatedTime());
             }
         }
         // Sort existingCompanyRecords
