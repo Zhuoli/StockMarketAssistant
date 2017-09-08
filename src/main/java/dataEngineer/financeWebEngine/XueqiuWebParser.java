@@ -80,13 +80,10 @@ public class XueqiuWebParser implements IWebParser {
                         .build();
 
         sharesQuote.setChangePercent("-");
-        if(DOUBLE_PATTERN.matcher(sharesQuote.getCurrentPrice()).find() && DOUBLE_PATTERN.matcher(sharesQuote.getOpenPrice()).find()) {
+        if(DOUBLE_PATTERN.matcher(sharesQuote.getCurrentPrice()).find() && sharesQuote.getClosePrice()!=0) {
             double currentPrice = Double.parseDouble(sharesQuote.getCurrentPrice());
-            double openPrice = Double.parseDouble(sharesQuote.getOpenPrice());
-            if( openPrice !=0) {
-                double change = 100 * (currentPrice - openPrice) / openPrice;
-                sharesQuote.setChangePercent(change > 0 ? String.format("+%.2f%%", change) : String.format("%.2f%%", change));
-            }
+            double change = 100 * (currentPrice - sharesQuote.getClosePrice()) / sharesQuote.getClosePrice();
+            sharesQuote.setChangePercent(change > 0 ? String.format("+%.2f%%", change) : String.format("%.2f%%", change));
         }
         return sharesQuote;
     }
