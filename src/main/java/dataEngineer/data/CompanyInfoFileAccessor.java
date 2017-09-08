@@ -151,7 +151,7 @@ public final class CompanyInfoFileAccessor {
                                 .builder()
                                 ._id(
                                         idPrefix + line.get(0))
-                                .companyname(line.get(1))
+                                .companyname(line.get(1).replace(" ", ""))
                                 .dateFirstIPO(line.get(2))
                                 .lastUpdatedTime(calendar.getTime())
                                 .build();
