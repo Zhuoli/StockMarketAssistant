@@ -5,6 +5,7 @@ import lombok.Data;
 import org.junit.Assert;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -54,6 +55,9 @@ public class SharesQuote{
     private Date lastUpdatedTime;
 
     private FinancialData financialData;
+
+    private List<String> concepts;
+
     public static int moveUnsearchedDataAhead(Set<String> updatedStockIdSet, SharesQuote[] array){
 
         Assert.assertNotNull(updatedStockIdSet);

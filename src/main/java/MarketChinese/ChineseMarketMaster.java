@@ -234,9 +234,10 @@ public class ChineseMarketMaster {
         }
 
         for(int idx=0; idx<companiesInCsvFile.length; idx++){
-            String symbol = companiesInCsvFile[idx].get_id();
-            if(stockIdCompanyRecordMap.containsKey(symbol)){
-                companiesInCsvFile[idx].setLastUpdatedTime(stockIdCompanyRecordMap.get(symbol).getLastUpdatedTime());
+            SharesQuote sharesQuote = companiesInCsvFile[idx];
+            if(stockIdCompanyRecordMap.containsKey(sharesQuote.get_id())){
+                sharesQuote.setLastUpdatedTime(stockIdCompanyRecordMap.get(sharesQuote.get_id()).getLastUpdatedTime());
+                sharesQuote.setConcepts(stockIdCompanyRecordMap.get(sharesQuote.get_id()).getConcepts());
             }
         }
         // Sort existingCompanyRecords

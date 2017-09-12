@@ -2,6 +2,7 @@ package util;
 
 import dataEngineer.data.SharesQuote;
 import dataEngineer.financeWebEngine.IWebParser;
+import dataEngineer.financeWebEngine.WencaiParser;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -30,6 +31,9 @@ public class RunmeFuture {
                 quote.setCompanyname(companyObject.getCompanyname());
                 if (quote.getDateFirstIPO() == null || quote.getDateFirstIPO().isEmpty()){
                     quote.setDateFirstIPO(companyObject.getDateFirstIPO());
+                }
+                if(companyObject.getConcepts() == null){
+                    quote.setConcepts(WencaiParser.retrieveConcepts(companyObject.get_id()));
                 }
                 this.result = Optional.of(quote);
             } catch (IOException exc) {

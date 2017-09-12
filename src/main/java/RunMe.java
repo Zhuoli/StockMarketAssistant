@@ -1,8 +1,10 @@
 import MarketChinese.ChineseMarketMaster;
 import MarketUS.USMarketMaster;
+import dataEngineer.financeWebEngine.WencaiParser;
 import org.apache.commons.cli.*;
 import util.MarketConstant;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
