@@ -23,7 +23,7 @@ import static com.mongodb.client.model.Filters.eq;
  */
 public class MongoDBConnector {
     public static final String DB_NAME = "stockdb";
-    private static String con = "mongodb://stockmarketdbzhuoli:FMB5jJ6pGLwDlTzpJxCM6sD2gE7Y1UAFoQ7tWVpppTz5W9AXe0NnerY5GaRkfPMYZIa7xopJUeMaduHsOwVm6Q==@stockmarketdbzhuoli.documents.azure.com:10255/?ssl=true&replicaSet=globaldb";
+    private static String con = "mongodb://zhuoli:tGVT}77mU)xHqB@stockmarket-shard-00-00-bcpbx.mongodb.net:27017,stockmarket-shard-00-01-bcpbx.mongodb.net:27017,stockmarket-shard-00-02-bcpbx.mongodb.net:27017/test?ssl=true&replicaSet=stockmarket-shard-0&authSource=admin";
     public static final String CHINESE_TABLE = "chinesestockmarket";
     public static final String US_TABLE = "usstockcompany";
     MongoClient mongoClient = null;
