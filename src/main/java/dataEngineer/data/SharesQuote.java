@@ -27,7 +27,7 @@ public class SharesQuote{
     private double lowestPrice;
     private double closePrice;
 
-    private String changePercent;
+    private double changePercent;
 
     // 成交量
     private String dealVolum;
