@@ -17,6 +17,14 @@ public class SharesQuote{
     private String _id;
 
     private String dateFirstIPO;
+    public String getDateFirstIPO(){
+        if(dateFirstIPO!=null && dateFirstIPO.contains("/")){
+            String[] strs = dateFirstIPO.split("/");
+            if(strs.length==3)
+                dateFirstIPO=strs[2]+"-" +strs[0] + "-" + strs[1];
+        }
+        return dateFirstIPO;
+    }
 
     private String companyname;
 
