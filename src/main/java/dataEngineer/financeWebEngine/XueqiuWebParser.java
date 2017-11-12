@@ -113,7 +113,7 @@ public class XueqiuWebParser implements IWebParser {
             // Parse html to get target element
             Document dom = Jsoup.connect(reportUrl).userAgent(XueqiuWebParser.USER_AGENT).get();
 
-            Elements elements = dom.getElementsByAttribute("data-current");
+            Elements elements = dom.getElementsByClass("stock-current");
             String currentPrice = "无法抓取";
             if (elements.size() == 1)
                 currentPrice = elements.first().text();
@@ -123,7 +123,7 @@ public class XueqiuWebParser implements IWebParser {
             if (currentPrice.startsWith("￥"))
                 currentPrice = currentPrice.substring(1);
 
-            elements = dom.getElementsByClass("topTable");
+            elements = dom.getElementsByClass("quote-info");
             if (elements.size() != 1) {
                 throw new Exception("element size should equal to one.");
             }
